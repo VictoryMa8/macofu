@@ -6,7 +6,18 @@ The Docker image runs the ASP.NET app, background worker, SQLite store, frontend
 
 ## Fly.io
 
-The configured app is `macofu` in the `personal` organization. Sign in using `fly auth login`, then deploy:
+The configured app is `macofu` in the `personal` organization. Pushes to GitHub's `main` branch now run [Deploy to Fly.io](https://github.com/VictoryMa8/macofu/actions/workflows/fly.yml). The workflow checks the factory assets and motion, builds the app, and smoke-tests both lessons in an isolated local lab before deploying that commit. It then compares every live web asset and all four source-inspector files with the checked-out commit and checks the lesson API. Production verification uses read-only requests.
+
+The workflow serializes deployments, keeps the existing single-machine configuration, and tags each image `git-COMMIT_SHA` with an `org.opencontainers.image.revision` label. A failed check stops the deployment. The Actions page shows whether a push has finished going live. The workflow can also be run manually on `main`.
+
+GitHub Actions authenticates through the repository's `FLY_API_TOKEN` Actions secret. It is scoped to the `macofu` app and expires after one year. To rotate it, use the existing Fly login and pipe a newly created token directly into GitHub's encrypted secret store without displaying or saving its value:
+
+```sh
+set -o pipefail
+fly tokens create deploy --app macofu --name 'GitHub Actions macofu' --expiry 8760h | gh secret set FLY_API_TOKEN --app actions --repo VictoryMa8/macofu
+```
+
+To deploy manually, sign in using `fly auth login`, then run:
 
 ```sh
 fly deploy --app macofu --remote-only --ha=false
@@ -29,6 +40,12 @@ The configuration uses HTTPS, Chicago, one shared CPU, and 512 MB of memory. Hos
 This is a shared demo. Visitors use the same lab state, and anyone can restart it or change the active mission. It does not collect accounts or personal data. Independent learner sessions and durable progress require additional application work.
 
 ## Verify a deployment
+
+```sh
+node scripts/verify-deployment.mjs
+```
+
+This checks that the live app matches the local checkout without changing the shared lesson. To exercise both lessons against production explicitly:
 
 ```sh
 MACOFU_TEST_URL=https://macofu.fly.dev node scripts/smoke-test.mjs

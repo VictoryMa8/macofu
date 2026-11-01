@@ -16,7 +16,7 @@ Requires .NET SDK 10.
 
 Open http://127.0.0.1:5080.
 
-For container hosting and Fly.io deployment, see [deployment](docs/deployment.md).
+Pushes to `main` automatically test and deploy to Fly.io. See the [deployment workflow](https://github.com/VictoryMa8/macofu/actions/workflows/fly.yml) for release status and [deployment](docs/deployment.md) for setup and manual commands.
 
 Choose either lesson part using the navigation. Each part opens with a prominent scenario and objective; **Start lesson** reveals the factory and its current action. Rush hour walks through a failed direct write, choosing a waiting line, accepting three orders, and saving them after recovery. The learner chooses when to continue from the failure and from acceptance to saving. Switching parts starts a fresh lab; selecting the current part leaves its progress alone. **Help & tools → Restart this part** restarts the selected part and returns to its introduction.
 
