@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f7f2">
+  <meta name="description" content="Choose a part of the full stack to explore with Macofu. Browse frontend, backend, data, and cloud learning areas. Play the first backend module today.">
+  <title>Modules — Macofu</title>
+  <link rel="icon" type="image/svg+xml" href="/icon.svg?v=spark-1">
+  <link rel="stylesheet" href="/landing.css?v=3">
+  <link rel="stylesheet" href="/modules.css?v=1">
+  <script src="/modules.js?v=1" defer></script>
+</head>
+<body class="library-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header wrap">
+    <a class="brand" href="/" aria-label="Macofu home"><img src="/icon.svg" width="48" height="36" alt="">macofu</a>
+    <nav aria-label="Main navigation"><a href="/">About macofu</a><a href="/modules.html" aria-current="page">Modules</a></nav>
+  </header>
+  <main id="main" class="wrap library-main">
+    <section class="library-intro" aria-labelledby="library-title">
+      <h1 id="library-title">Pick a part<br>of the <span>stack.</span></h1>
+      <p>Explore how software fits together, one module at a time. The backend factory is ready to play. More modules across the stack are planned.</p>
+    </section>
+    <div class="library-workspace">
+      <nav class="area-navigation" aria-label="Choose a part of the full stack">
+        <a href="#frontend" data-area="frontend"><span class="area-symbol area-purple" aria-hidden="true">▤</span><span>Frontend</span><span class="area-arrow" aria-hidden="true">↗</span></a>
+        <a href="#backend" data-area="backend"><span class="area-symbol area-orange" aria-hidden="true">{ }</span><span>Backend</span><span class="area-arrow" aria-hidden="true">↗</span></a>
+        <a href="#data" data-area="data"><span class="area-symbol area-green" aria-hidden="true">≋</span><span>Data</span><span class="area-arrow" aria-hidden="true">↗</span></a>
+        <a href="#cloud" data-area="cloud"><span class="area-symbol area-blue" aria-hidden="true">◎</span><span>Cloud &amp; DevOps</span><span class="area-arrow" aria-hidden="true">↗</span></a>
+      </nav>
+      <div class="area-panels">
+        <section class="area-panel" id="backend" aria-labelledby="backend-title">
+          <div class="area-heading"><h2 id="backend-title">Backend</h2><p>The software behind the screen: receiving requests, applying rules, and getting work done.</p></div>
+          <article class="library-module">
+            <div class="library-artwork">
+              <div class="factory-art" role="img" aria-label="A miniature factory with an order scanner, conveyor belts, a robot worker, and a warehouse.">
+                <img class="factory-base" src="/assets/factory/factory-floor.png" width="2080" height="1240" alt="" fetchpriority="high">
+                <img class="factory-api" src="/assets/factory/intake-scanner.png" width="225" height="316" alt="">
+                <img class="factory-worker" src="/assets/factory/robot-idle.png" width="186" height="272" alt="">
+                <img class="factory-database" src="/assets/factory/storage-offline.png" width="376" height="548" alt="">
+                <img class="factory-parcel" src="/assets/factory/parcel.png" width="85" height="104" alt="">
+              </div>
+            </div>
+            <div class="library-module-copy"><span class="module-availability">Playable now</span><h3>Order dispatch factory</h3><p>A shop is receiving orders, but saving them isn’t going to plan. Keep them safe during an outage, then follow an accepted order that seems to have gone missing.</p><ul class="module-topics" aria-label="Topics in this module"><li>APIs</li><li>Queues</li><li>Workers</li><li>Databases</li></ul><a class="button button-dark" href="/lesson.html?mission=rush-hour">Start module <span aria-hidden="true">↗</span></a></div>
+            <details class="module-contents"><summary>Explore the two lesson parts <span aria-hidden="true">+</span></summary><div class="module-lessons"><a href="/lesson.html?mission=rush-hour"><h4>1. Rush hour <span aria-hidden="true">↗</span></h4><p>Accept three purchase orders while the database is unavailable, then save those same orders after recovery.</p></a><a href="/lesson.html?mission=missing-order"><h4>2. Accepted, but missing <span aria-hidden="true">↗</span></h4><p>Trace one reported order through the running system and get that exact order into the database.</p></a></div></details>
+          </article>
+        </section>
+        <section class="area-panel" id="frontend" aria-labelledby="frontend-title">
+          <div class="area-heading"><h2 id="frontend-title">Frontend</h2><p>The part people see and use: screens, interactions, and feedback.</p></div>
+          <div class="planned-area planned-frontend"><div class="subject-art ui-art" aria-hidden="true"><div class="mini-window"><div></div><span></span><span></span><span class="mini-button"></span></div><span class="ui-cursor">↖</span></div><h3>Frontend modules are planned.</h3><p>We want to explore how interfaces respond to people and turn code into something useful. There are no playable frontend modules yet.</p><a class="plain-link" href="#backend" data-area="backend">Try the backend factory <span aria-hidden="true">→</span></a></div>
+        </section>
+        <section class="area-panel" id="data" aria-labelledby="data-title">
+          <div class="area-heading"><h2 id="data-title">Data</h2><p>How software remembers things: storing, finding, and changing information.</p></div>
+          <div class="planned-area planned-data"><div class="subject-art storage-art" aria-hidden="true"><span></span><span></span><span></span></div><h3>Data modules are planned.</h3><p>This area will explore the information applications depend on. While dedicated data modules are still ahead, the backend factory already lets you see orders reach a database.</p><a class="plain-link" href="#backend" data-area="backend">Try the backend factory <span aria-hidden="true">→</span></a></div>
+        </section>
+        <section class="area-panel" id="cloud" aria-labelledby="cloud-title">
+          <div class="area-heading"><h2 id="cloud-title">Cloud &amp; DevOps</h2><p>How software reaches the world and keeps running after it gets there.</p></div>
+          <div class="planned-area planned-cloud"><div class="subject-art delivery-art" aria-hidden="true"><span>&lt;/&gt;</span><i>→</i><span>◎</span></div><h3>Cloud &amp; DevOps modules are planned.</h3><p>We want to make deployment, infrastructure, and operating software easier to explore. There are no playable modules in this area yet.</p><a class="plain-link" href="#backend" data-area="backend">Try the backend factory <span aria-hidden="true">→</span></a></div>
+        </section>
+      </div>
+    </div>
+  </main>
+  <footer class="site-footer wrap"><a class="brand" href="/" aria-label="Macofu home"><img src="/icon.svg" width="40" height="30" alt="">macofu</a><p>Make coding fun again.</p><a href="/">About macofu <span aria-hidden="true">↗</span></a></footer>
+</body>
+</html>

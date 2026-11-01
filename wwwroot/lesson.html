@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fdf0d5"><title>Macofu — Rush hour</title>
+  <link rel="icon" type="image/svg+xml" href="/icon.svg?v=spark-1"><link rel="stylesheet" href="/style.css?v=focused-9"><script src="/scene.js?v=factory-6" defer></script><script src="/app.js?v=landing-10" defer></script>
+</head>
+<body>
+  <header><a class="brand" href="/" aria-label="Macofu home"><img class="brand-mark" src="/icon.svg?v=spark-1" width="48" height="36" alt="" aria-hidden="true">macofu</a><a class="quiet" href="/modules.html#backend">← All modules</a></header>
+  <main>
+    <nav class="mission-nav" aria-label="Order dispatch lesson parts"><button data-mission="rush-hour" aria-pressed="true"><span>Part 1</span> Rush hour</button><button data-mission="missing-order" aria-pressed="false"><span>Part 2</span> Accepted, but missing</button></nav>
+    <section class="intro" aria-labelledby="mission-title"><h1 id="mission-title" tabindex="-1">Rush hour</h1><div class="intro-copy"><p class="lesson-description" id="lesson-description">Customers are placing orders. Your shop can’t save them.</p><p class="lesson-context" id="lesson-context">The database, where the shop stores its orders, is offline. You’ll use the factory controls to keep three customer purchase orders safe, then bring the database back and save them.</p><button id="start-lesson" class="solid" disabled>Start lesson</button></div></section>
+    <div class="lesson-toolbar" hidden><div class="workspace-tabs" role="group" aria-label="Lesson workspace"><button id="show-guide" aria-pressed="true">Factory</button><button id="open-code" aria-pressed="false" aria-expanded="false" aria-controls="inspector">Source code</button></div><details class="lesson-options"><summary>Help &amp; tools</summary><div class="tools-menu"><button data-tool="help">Help with this step</button><button data-tool="progress">Lesson progress</button><button data-tool="definitions">Factory guide</button><button data-tool="history">Request history</button><button id="inspect-target" hidden>Inspect customer order</button><button id="reset">Restart this part</button></div></details></div>
+    <div id="connection" class="connection-error" role="status" hidden>Connection lost. Reconnecting…</div>
+    <div class="workspace" hidden>
+    <div class="simulation">
+    <section class="game" aria-label="Interactive order dispatch puzzle">
+      <div class="route-control"><div><span class="control-label">Route for new orders</span><strong id="route-label">Direct to database</strong></div><button id="change-route" class="change-route" aria-expanded="false" aria-controls="route-choices">Change route</button></div>
+      <fieldset id="route-choices" class="route-choices" hidden><legend>Choose where the API sends new orders</legend><p>The API is the software that receives an order. Click an option to change its route.</p><div class="route-options"><button id="route-direct" aria-pressed="true"><strong>Direct to database</strong><span>Try to save the order immediately.</span><small class="route-selection">Selected</small></button><button id="route-queue" aria-pressed="false"><strong>Via queue</strong><span>Keep the order in a waiting line until it can be saved.</span><small class="route-selection">Selected</small></button></div></fieldset>
+      <nav class="scene-nav" aria-label="Factory view"><button data-view="sender">Orders</button><button data-view="api-station">API</button><button data-view="queue-station">Queue</button><button data-view="worker-station">Worker</button><button data-view="database-station">Database</button></nav>
+      <div class="scene-scroll" tabindex="0" role="region" aria-label="Factory floor. Scroll horizontally to explore on narrow screens."><div class="scene" id="scene">
+        <img class="factory-floor" src="/assets/factory/factory-floor.png" alt="" draggable="false">
+        <svg class="route-overlay" viewBox="0 0 1040 620" aria-hidden="true"><path id="direct-route"/><path id="queued-route"/></svg>
+        <div class="station sender"><button class="parcel-button" id="parcel" aria-label="Send an order. You can also drag this parcel to the API."><img alt="" draggable="false"><span>Send order</span></button></div>
+        <div class="station api-station" id="api-drop"><button class="machine-art api-art" data-inspect="handler" aria-label="Inspect API code"><img alt="" draggable="false"></button><div class="station-controls"><strong>API</strong></div></div>
+        <div class="station queue-station"><div class="station-controls"><button class="station-name inspect-label" data-inspect="queue">Queue <span id="queue-count" hidden>0</span></button></div></div>
+        <div class="queue-rack" id="queue-rack" role="group" aria-label="Queued orders"><div id="queue-packages"></div></div>
+        <div class="station worker-station"><button class="machine-art robot-art" data-inspect="worker" aria-label="Inspect worker code"><img alt="" draggable="false"></button><div class="station-controls"><strong>Worker</strong><button id="worker-toggle" class="machine-toggle">Ⅱ Pause worker</button><span id="worker-state" class="machine-state">Waiting for database</span></div></div>
+        <div class="station database-station"><button class="machine-art warehouse-art" data-inspect="database" aria-label="Inspect database code"><img alt="" draggable="false"></button><div class="station-controls"><strong>Database</strong><button id="database-toggle" class="machine-toggle power-button">Restore database</button><span id="db-count" class="machine-state">Offline</span></div></div>
+        <div id="stock-packages" aria-hidden="true"></div>
+        <div id="parcels-layer" class="parcels-layer" aria-hidden="true"></div><div id="effects-layer" class="effects-layer" aria-hidden="true"></div>
+      </div></div>
+      <span id="game-feedback" class="sr-only" role="status"></span>
+    </section>
+    </div>
+    <aside class="lesson-panel" aria-label="Current lesson step">
+      <section class="guide-card" aria-labelledby="guide-title"><h2 id="guide-title" tabindex="-1">Send one customer order</h2><p id="guide-body">Each parcel is a customer’s purchase order. Click Send order and watch what happens while the database is offline.</p><p id="guide-progress" class="guide-progress" role="status" hidden></p><button id="guide-action" class="solid">Send order</button></section>
+      <section id="tool-panel" class="tool-panel" hidden aria-labelledby="tool-title"><div class="panel-heading"><h2 id="tool-title" tabindex="-1">Help with this step</h2><button id="close-tool" class="quiet">Back to lesson</button></div>
+        <div data-tool-content="help" hidden><p id="hint"></p></div>
+        <div data-tool-content="progress" class="goals" hidden><h3 id="goals-heading">Rush hour progress</h3><p id="goals-description">Both tasks use the same three customer orders.</p><div class="objectives" aria-live="polite" aria-atomic="true">
+          <div class="objective" id="protect-goal"><strong>Keep 3 orders during the outage</strong><p>Accept each order into the queue while the database is offline.</p><span class="goal-progress" id="protect-progress">0 of 3 accepted. In progress.</span></div>
+          <div class="objective" id="deliver-goal"><strong id="deliver-label">Save those same 3 orders</strong><p id="deliver-description">Restore the database so the worker can save the waiting orders.</p><span class="goal-progress" id="deliver-progress">0 of 3 saved. Up next.</span></div>
+        </div></div>
+        <div data-tool-content="definitions" hidden><div class="term-tabs" role="group" aria-label="Factory component"><button data-term="order" aria-pressed="true">Parcel</button><button data-term="api" aria-pressed="false">API</button><button data-term="queue" aria-pressed="false">Queue</button><button data-term="worker" aria-pressed="false">Worker</button><button data-term="database" aria-pressed="false">Database</button></div><p id="term-description">Each parcel is data about one customer’s purchase. Send order creates a test order; no real purchase is made.</p></div>
+        <div data-tool-content="history" hidden><p>A record of what the software did after each action.</p><p id="history-empty">No activity yet. Send an order to see how the software responds.</p><p id="http-result" class="http-result" hidden>Ready</p><div class="order-tray" hidden><h3>Inspect an order</h3><div id="order-list"></div></div><div id="events"></div></div>
+      </section>
+      <section class="journey" id="journey" hidden aria-labelledby="journey-heading"><div class="inspector-top"><h2 id="journey-heading" tabindex="-1">Order journey</h2><button id="close-journey" class="quiet">Back to next step</button></div><p class="journey-help">Follow this order from acceptance to storage. Accepted means the system took the request; saved means it reached the database.</p><div id="journey-content" aria-live="polite"></div></section>
+    </aside>
+      <section class="inspector" id="inspector" hidden aria-labelledby="code-heading"><div class="tool-heading"><div><h2 id="code-heading">Code behind the factory</h2><p id="source-description">API code receives each order request.</p></div><button id="close-code" class="quiet" aria-label="Close code inspector">×</button></div><div class="inspector-top"><div class="code-tabs" role="group" aria-label="Source file"><button data-source="handler">API</button><button data-source="queue">Queue</button><button data-source="worker">Worker</button><button data-source="database">Database</button></div></div><pre tabindex="0" aria-label="Source code; scroll to read more"><code id="source-code"></code></pre></section>
+    </div>
+  </main><div id="error" class="error" role="alert" hidden></div>
+</body>
+</html>

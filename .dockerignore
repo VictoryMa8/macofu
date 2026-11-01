@@ -1,0 +1,10 @@
+**
+!Macofu.csproj
+!Program.cs
+!Lab.cs
+!OrderStore.cs
+!OrderWorker.cs
+!appsettings.json
+!wwwroot/
+!wwwroot/**
+!Dockerfile

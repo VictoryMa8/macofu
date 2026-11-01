@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f7f2">
+  <meta name="description" content="Macofu means Make coding fun again. Explore full-stack software engineering through playful, hands-on learning modules. Try the first module today.">
+  <title>Macofu — Make coding fun again.</title>
+  <link rel="icon" type="image/svg+xml" href="/icon.svg?v=spark-1">
+  <link rel="stylesheet" href="/landing.css?v=3">
+  <script src="/landing.js?v=2" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header wrap">
+    <a class="brand" href="/" aria-label="Macofu home"><img src="/icon.svg" width="48" height="36" alt="">macofu</a>
+    <nav aria-label="Main navigation"><a href="#approach">The approach</a><a href="#explore">The whole stack</a><a href="/modules.html">Modules</a></nav>
+    <a class="button button-small button-dark" href="/modules.html">Start playing <span aria-hidden="true">↗</span></a>
+  </header>
+
+  <main id="main">
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <h1 id="hero-title">Make coding<br><span>fun</span> again.</h1>
+        <p>Explore full-stack software engineering through hands-on challenges. Build an understanding of how software works by playing with the pieces.</p>
+        <div class="hero-actions"><a class="button button-dark" href="/modules.html">Explore modules <span aria-hidden="true">↗</span></a><a class="plain-link" href="#explore">Explore the vision <span aria-hidden="true">↓</span></a></div>
+      </div>
+      <div class="stack-playground" aria-label="Illustrative full-stack playground">
+        <span class="playground-star" aria-hidden="true">✳</span>
+        <div class="browser-piece">
+          <div class="browser-chrome" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="browser-content"><span class="demo-heading">Hello, possibility.</span><div class="demo-layout" aria-hidden="true"><div></div><div></div><div></div></div><button id="stack-send" hidden>Give it a click <span aria-hidden="true">↗</span></button></div>
+          <strong class="piece-label">Frontend</strong>
+        </div>
+        <div class="backend-piece"><strong>Backend</strong><code><span>receive</span>(idea)<br><span>makeSomething</span>()<br><span>return</span> possibility</code><span class="backend-arrow" aria-hidden="true">↳</span></div>
+        <div class="data-piece"><span class="data-icon" aria-hidden="true"><i></i><i></i><i></i></span><strong>Data</strong><span class="data-check" id="data-check" aria-hidden="true">✓</span></div>
+        <div class="demo-feedback" id="stack-feedback" role="status">Click the frontend. Follow the idea.</div>
+        <span class="playground-loop" aria-hidden="true">↝</span>
+      </div>
+    </section>
+
+    <section class="approach-section wrap" id="approach" aria-labelledby="approach-title">
+      <div class="approach-intro"><h2 id="approach-title">Remember when figuring <br>something out was fun?</h2><p>That’s the feeling we’re building for. A place to experiment, follow your curiosity, and make sense of software by seeing what it does.</p></div>
+      <div class="approach-grid">
+        <article><span class="approach-symbol symbol-orange" aria-hidden="true">↗</span><h3>Get your hands on it.</h3><p>Start with a problem you can act on. Change something in a running system and see the result, instead of trying to hold every idea in your head.</p></article>
+        <article><span class="approach-symbol symbol-purple" aria-hidden="true">⌁</span><h3>Make room for “what if?”</h3><p>Try a different route. Stop a process. Follow an unexpected result. Experimenting gives you questions worth answering.</p></article>
+        <article><span class="approach-symbol symbol-green" aria-hidden="true">&lt;/&gt;</span><h3>Understand the why.</h3><p>Connect what you see to the code and evidence behind it. The aim is to explain how the pieces work together, beyond getting an answer right.</p></article>
+      </div>
+    </section>
+
+    <section class="curriculum-section" id="explore" aria-labelledby="curriculum-title">
+      <div class="wrap">
+        <div class="section-heading"><h2 id="curriculum-title">A whole stack<br>of things to discover.</h2><p>Full-stack engineering connects what people see, what happens on a server, how data is stored, and how software reaches the world. Macofu’s ambition is a library of 20+ modules across these areas. The order dispatch factory is the first playable module.</p></div>
+        <div class="curriculum-grid">
+          <a class="subject subject-frontend" href="/modules.html#frontend"><div class="subject-art ui-art" aria-hidden="true"><div class="mini-window"><div></div><span></span><span></span><span class="mini-button"></span></div><span class="ui-cursor">↖</span></div><h3>The interfaces we use.</h3><p>Frontend development: the screens, interactions, and feedback that turn software into something people can use.</p></a>
+          <a class="subject subject-backend" href="/modules.html#backend"><div class="subject-art api-art" aria-hidden="true"><span>{ }</span><i>→</i><span>✓</span></div><h3>The work behind the scenes.</h3><p>Backend development: receiving requests, applying rules, and getting the right work to the right place.</p></a>
+          <a class="subject subject-data" href="/modules.html#data"><div class="subject-art storage-art" aria-hidden="true"><span></span><span></span><span></span></div><h3>The information that stays.</h3><p>Databases and data: storing information, finding it again, and understanding what happens when it changes.</p></a>
+          <a class="subject subject-delivery" href="/modules.html#cloud"><div class="subject-art delivery-art" aria-hidden="true"><span>&lt;/&gt;</span><i>→</i><span>◎</span></div><h3>The path to the real world.</h3><p>Cloud and DevOps: getting software running, keeping it healthy, and understanding how its parts connect.</p></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="module-section wrap" id="modules" aria-labelledby="module-title">
+      <div class="module-intro"><h2 id="module-title">Big plans.<br>One place to start.</h2><p>Meet the first module: a small factory that makes the hidden work of a backend visible.</p></div>
+      <article class="featured-module">
+        <div class="module-artwork">
+          <div class="factory-art" role="img" aria-label="An order dispatch factory with a scanner, conveyor belts, robot worker, and storage warehouse.">
+            <img class="factory-base" src="/assets/factory/factory-floor.png" width="2080" height="1240" alt="" loading="lazy">
+            <img class="factory-api" src="/assets/factory/intake-scanner.png" width="225" height="316" alt="" loading="lazy">
+            <img class="factory-worker" src="/assets/factory/robot-idle.png" width="186" height="272" alt="" loading="lazy">
+            <img class="factory-database" src="/assets/factory/storage-offline.png" width="376" height="548" alt="" loading="lazy">
+            <img class="factory-parcel" src="/assets/factory/parcel.png" width="85" height="104" alt="" loading="lazy">
+          </div>
+        </div>
+        <div class="module-copy"><span class="available-label">Playable now</span><h3>The order <br>dispatch factory.</h3><p>A shop is receiving purchase orders, but saving them isn’t going to plan. Take control of the system, keep orders moving, and find out what “accepted” really means.</p><p>Explore an API that receives orders, a queue that holds waiting work, a background worker, and a database that stores the records.</p><a class="button button-orange" href="/lesson.html?mission=rush-hour">Play this module <span aria-hidden="true">↗</span></a></div>
+      </article>
+      <div class="module-parts"><h3>Two parts. One connected system.</h3><div class="parts-grid"><a class="part-link" href="/lesson.html?mission=rush-hour"><span class="part-number">01</span><div><h4>Rush hour</h4><p>Keep three customer orders safe during an outage, then save those same orders after recovery.</p></div><span aria-hidden="true">↗</span></a><a class="part-link" href="/lesson.html?mission=missing-order"><span class="part-number">02</span><div><h4>Accepted, but missing</h4><p>Trace an accepted order that hasn’t reached the database and find what’s stopping it.</p></div><span aria-hidden="true">↗</span></a></div></div>
+    </section>
+
+    <section class="faq-section wrap" id="questions" aria-labelledby="faq-title"><h2 id="faq-title">A few good questions.</h2><div class="faq-list">
+      <details name="macofu-questions"><summary>Is macofu just about backend development?<span aria-hidden="true">+</span></summary><p>No. Macofu means “Make coding fun again.” The vision is full-stack software engineering, from interfaces and application logic to data, cloud, and delivery. The backend factory is our first module, with two playable parts.</p></details>
+      <details name="macofu-questions"><summary>Are all 20+ modules available?<span aria-hidden="true">+</span></summary><p>Not yet. A library of 20+ modules is our ambition, rather than a finished catalog. You can play the order dispatch factory today. The broader topics on this page describe the direction we want to take.</p></details>
+      <details name="macofu-questions"><summary>How much experience do I need?<span aria-hidden="true">+</span></summary><p>The first module assumes you’re new to backend systems. It introduces terms as you need them and starts with a clear action. You can operate the factory before opening the C# source to look closer.</p></details>
+      <details name="macofu-questions"><summary>Do I need to install anything?<span aria-hidden="true">+</span></summary><p>No. The current module runs in your browser, with real requests handled by a running server. You can use buttons instead of dragging, and the lesson supports keyboard navigation, narrow screens, and reduced motion.</p></details>
+      <details name="macofu-questions"><summary>Does the first module save my progress?<span aria-hidden="true">+</span></summary><p>The current prototype has one shared lab across visitors and tabs, with no individual accounts or saved learner progress. Switching parts or restarting clears the shared orders and progress. Its waiting queue is kept in memory and clears when the app restarts.</p></details>
+    </div></section>
+
+    <section class="closing-section"><div class="wrap closing-content"><h2>Follow your curiosity.<br>See what clicks.</h2><a class="button button-dark" href="/modules.html">Let’s make coding fun <span aria-hidden="true">↗</span></a><span aria-hidden="true">✳</span></div></section>
+  </main>
+  <footer class="site-footer wrap"><a class="brand" href="/" aria-label="Macofu home"><img src="/icon.svg" width="40" height="30" alt="">macofu</a><p>Make coding fun again.</p><a href="#main">Back to top <span aria-hidden="true">↑</span></a></footer>
+</body>
+</html>

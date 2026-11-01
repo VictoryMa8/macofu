@@ -1,0 +1,321 @@
+{
+  "version": 1,
+  "source": "https://kenney.nl/assets/factory-kit",
+  "canvas": [
+    1040,
+    620
+  ],
+  "render": {
+    "tool": "5.2.3 LTS",
+    "engine": "Cycles CPU",
+    "samples": 24,
+    "resolution": [
+      2080,
+      1240
+    ],
+    "camera": {
+      "location": [
+        9.0,
+        -14.0,
+        14.0
+      ],
+      "target": [
+        0,
+        -0.5,
+        0.3
+      ],
+      "orthographicScale": 12.6
+    },
+    "light": {
+      "location": [
+        -3,
+        -4,
+        9
+      ],
+      "energy": 1250,
+      "size": 5
+    },
+    "colorManagement": "Standard",
+    "alpha": "straight PNG; shared grounding shadows baked into floor; no CSS shadows"
+  },
+  "anchors": {
+    "sender": [
+      233.85,
+      148.62
+    ],
+    "apiIn": [
+      312.82,
+      182.59
+    ],
+    "api": [
+      343.73,
+      195.88
+    ],
+    "apiOut": [
+      381.5,
+      212.13
+    ],
+    "branch": [
+      405.54,
+      222.46
+    ],
+    "queueIn": [
+      313.97,
+      311.08
+    ],
+    "queue": [
+      382.65,
+      340.62
+    ],
+    "worker": [
+      520.0,
+      399.69
+    ],
+    "turn": [
+      657.35,
+      458.77
+    ],
+    "dbIn": [
+      748.92,
+      370.15
+    ],
+    "database": [
+      797.0,
+      390.83
+    ]
+  },
+  "assets": {
+    "factory-floor": {
+      "file": "/assets/factory/factory-floor.png",
+      "dimensions": [
+        2080,
+        1240
+      ],
+      "size": [
+        1040.0,
+        620.0
+      ],
+      "pivot": [
+        542.89,
+        306.77
+      ],
+      "sourceModels": [
+        "floor",
+        "conveyor-bars",
+        "conveyor-corner",
+        "conveyor-junction-t",
+        "scanner-high",
+        "robot-arm-a",
+        "structure-doorway-wide",
+        "door-wide-closed"
+      ],
+      "connections": {}
+    },
+    "intake-scanner": {
+      "file": "/assets/factory/intake-scanner.png",
+      "dimensions": [
+        225,
+        316
+      ],
+      "size": [
+        112.5,
+        158.0
+      ],
+      "pivot": [
+        56.23,
+        111.61
+      ],
+      "sourceModels": [
+        "scanner-high"
+      ],
+      "connections": {
+        "in": [
+          312.82,
+          182.59
+        ],
+        "out": [
+          381.5,
+          212.13
+        ]
+      }
+    },
+    "robot-idle": {
+      "file": "/assets/factory/robot-idle.png",
+      "dimensions": [
+        186,
+        272
+      ],
+      "size": [
+        93.0,
+        136.0
+      ],
+      "pivot": [
+        29.29,
+        116.29
+      ],
+      "sourceModels": [
+        "robot-arm-a"
+      ],
+      "connections": {
+        "work": [
+          520.0,
+          399.69
+        ]
+      }
+    },
+    "robot-working": {
+      "file": "/assets/factory/robot-working.png",
+      "dimensions": [
+        186,
+        248
+      ],
+      "size": [
+        93.0,
+        124.0
+      ],
+      "pivot": [
+        29.29,
+        104.29
+      ],
+      "sourceModels": [
+        "robot-arm-a"
+      ],
+      "connections": {
+        "work": [
+          520.0,
+          399.69
+        ]
+      }
+    },
+    "storage-online": {
+      "file": "/assets/factory/storage-online.png",
+      "dimensions": [
+        376,
+        548
+      ],
+      "size": [
+        188.0,
+        274.0
+      ],
+      "pivot": [
+        108.0,
+        218.56
+      ],
+      "sourceModels": [
+        "structure-doorway-wide",
+        "door-wide-open"
+      ],
+      "connections": {
+        "in": [
+          748.92,
+          370.15
+        ]
+      }
+    },
+    "storage-offline": {
+      "file": "/assets/factory/storage-offline.png",
+      "dimensions": [
+        376,
+        548
+      ],
+      "size": [
+        188.0,
+        274.0
+      ],
+      "pivot": [
+        108.0,
+        218.56
+      ],
+      "sourceModels": [
+        "structure-doorway-wide",
+        "door-wide-closed"
+      ],
+      "connections": {
+        "in": [
+          748.92,
+          370.15
+        ]
+      }
+    },
+    "parcel": {
+      "file": "/assets/factory/parcel.png",
+      "dimensions": [
+        85,
+        104
+      ],
+      "size": [
+        42.5,
+        52.0
+      ],
+      "pivot": [
+        21.39,
+        37.27
+      ],
+      "sourceModels": [
+        "box-small"
+      ],
+      "connections": {}
+    }
+  },
+  "stations": {
+    "sender": [
+      233.85,
+      173.84
+    ],
+    "api": [
+      343.73,
+      221.11
+    ],
+    "queue": [
+      382.65,
+      365.84
+    ],
+    "worker": [
+      478.79,
+      464.79
+    ],
+    "database": [
+      797.0,
+      416.06
+    ]
+  },
+  "queueSlots": [
+    [
+      338.01,
+      321.42
+    ],
+    [
+      382.65,
+      340.62
+    ],
+    [
+      427.29,
+      359.82
+    ]
+  ],
+  "stockSlots": [
+    [
+      787.84,
+      417.35
+    ],
+    [
+      810.73,
+      395.2
+    ],
+    [
+      833.63,
+      373.04
+    ]
+  ],
+  "states": {
+    "worker": {
+      "paused": "robot-idle",
+      "ready": "robot-idle",
+      "working": "robot-working"
+    },
+    "database": {
+      "online": "storage-online",
+      "offline": "storage-offline"
+    }
+  }
+}
