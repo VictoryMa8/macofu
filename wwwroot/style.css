@@ -146,11 +146,11 @@ body:not(.lesson-started) .mission-nav { max-width: 900px; margin: auto; }
 .database-station.needs-power .power-button { animation: invite 1.4s ease-in-out infinite; }
 .parcels-layer, .effects-layer { position: absolute; inset: 0; pointer-events: none; z-index: 3; overflow: hidden; }
 .effects-layer { z-index: 8; }
-.flying-parcel { position: absolute; background: url('/assets/factory/parcel.png') center / contain no-repeat; }
+.flying-parcel { position: absolute; background: var(--parcel-image) center / contain no-repeat; }
 .flying-parcel.failed { filter: sepia(.5) saturate(2); }
 .float-label { position: absolute; transform: translate(-50%,-50%); font: bold 11px var(--mono); padding: 7px 10px; background: var(--cream); border: 1px solid var(--burgundy); color: var(--burgundy); border-radius: 6px; white-space: nowrap; animation: float-up 1.5s ease-out forwards; }
 .float-label.ok { border-color: var(--navy); color: var(--navy); }
-.drag-ghost { position: fixed; z-index: 100; pointer-events: none; width: 72px; height: 72px; background: url('/assets/factory/parcel.png') center / contain no-repeat; transform: translate(-50%,-70%); }
+.drag-ghost { position: fixed; z-index: 100; pointer-events: none; width: 72px; height: 72px; background: var(--parcel-image) center / contain no-repeat; transform: translate(-50%,-70%); }
 .solid { border: 0; background: var(--burgundy); color: var(--cream); font-size: 13px; padding: 12px 15px; border-radius: 6px; white-space: nowrap; }
 .solid:hover { background: var(--red); }
 .order-tray { margin: 24px 0; }

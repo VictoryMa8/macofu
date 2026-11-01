@@ -1,5 +1,21 @@
 # Graphics overhaul verification
 
+## Geometry simplification — November 1, 2026
+
+The playable scene now uses simple code-authored solids instead of the previous assembled models. Smooth welded belts replace the repeated rollers; a two-link worker replaces the folded arm; a single cabinet shell with a flush shutter replaces the intersecting doorway pieces. Camera, sprite pivots, and projected parcel paths remain shared. The cabinet now faces the learner, and its new approach anchor keeps both delivery routes on the belt. Silver, graphite, cobalt, and amber distinguish machinery from orders. Image-content hashes prevent stale sprites from being stretched into new bounds.
+
+- The local app built and ran at `http://127.0.0.1:5094`. The existing NU1900 vulnerability-service warning remains; compilation succeeded.
+- `node scripts/verify-factory.mjs` passed export sizes, pivots, authored geometry, content hashes, distinct physical states, queue hit areas, all travel anchors, reduced motion, preference changes, and reset cancellation.
+- `MACOFU_TEST_URL=http://127.0.0.1:5094 node scripts/smoke-test.mjs` passed both missions, order identity, receipts and lookups, queue capacity, source inspection, and restart.
+- Browser verification at 1280 × 900 completed Rush hour after a failed direct write, a route change, three Enter submissions, and database recovery. All three parcels stayed separate on the queue lane. The open cabinet and worker state were exercised during saving. Source code remained beside the operable factory.
+- At 390 × 844, the page and document widths were both 390px. Factory navigation brought database and worker controls fully into view after smooth scrolling settled. Enter started the worker and the missing-order lesson reached “The missing order is saved.”
+- All scene image elements loaded, and browser warning/error logs were empty in the final verification. The local lab was returned to the opening Rush hour workspace.
+- `git diff --check` and both JavaScript syntax checks passed.
+
+`screenshots/clean-factory-desktop.jpg` is the actual revised desktop lesson. `screenshots/clean-factory-geometry.png` is a composite of the exported assets that shows the new geometry with three queued parcels.
+
+## Previous model-based overhaul
+
 Verified November 1, 2026, against the local ASP.NET app at http://127.0.0.1:5080/.
 
 - `dotnet build`: succeeded, zero errors. NuGet emitted NU1900 warnings because its vulnerability service index was unavailable, including during a retry outside the sandbox. No project audit setting was changed.

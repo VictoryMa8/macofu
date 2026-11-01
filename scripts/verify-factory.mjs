@@ -1,14 +1,17 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import vm from 'node:vm';
+import { createHash } from 'node:crypto';
 
 const manifest=JSON.parse(await fs.readFile(new URL('../wwwroot/assets/factory/manifest.json',import.meta.url)));
 for (const [name,asset] of Object.entries(manifest.assets)) {
   const png=await fs.readFile(new URL(`../wwwroot${asset.file}`,import.meta.url));
   assert.equal(png.subarray(1,4).toString(),'PNG',name);
+  assert.equal(new URL(asset.file, 'http://local').searchParams.get('v'), createHash('sha256').update(png).digest('hex').slice(0,12), `${name} invalidates stale browser images`);
   assert.deepEqual([png.readUInt32BE(16),png.readUInt32BE(20)],asset.dimensions,name);
   assert.deepEqual(asset.size,asset.dimensions.map(n=>n/2),`${name} is a 2x export`);
   assert(asset.pivot.every(Number.isFinite),`${name} has a stable pivot`);
+  assert(asset.geometry?.length, `${name} records its authored geometry`);
   for(const source of asset.sourceModels)await fs.access(new URL(`../assets/kenney-factory-kit/models/${source}.glb`,import.meta.url));
 }
 assert.deepEqual(manifest.assets['intake-scanner'].connections.in,manifest.anchors.apiIn);
@@ -16,10 +19,19 @@ assert.deepEqual(manifest.assets['storage-online'].connections.in,manifest.ancho
 assert.deepEqual(manifest.assets['storage-offline'].connections.in,manifest.anchors.dbIn);
 assert.deepEqual(manifest.assets['robot-working'].connections.work,manifest.anchors.worker);
 assert(manifest.assets.parcel.size[0] < Math.abs(manifest.queueSlots[1][0]-manifest.queueSlots[0][0]), 'Queued parcel hit areas must not overlap');
-console.log('PASS: PNG sizes, 2x resolution, pivots, original models, and station connections.');
+for (const [idle, active] of [['robot-idle', 'robot-working'], ['storage-offline', 'storage-online']]) {
+  const [a, b] = await Promise.all([idle, active].map(name => fs.readFile(new URL(`../wwwroot${manifest.assets[name].file}`, import.meta.url))));
+  assert(!a.equals(b), `${idle} and ${active} must show different physical states`);
+}
+console.log('PASS: PNG sizes, 2x resolution, pivots, authored geometry, distinct states, and station connections.');
 
 // Execute the actual motion function with a deterministic clock; no server or DOM mutation.
 const source=await fs.readFile(new URL('../wwwroot/app.js',import.meta.url),'utf8');
+for (const path of source.matchAll(/factory\.path\(([^)]*)\)/g)) {
+  for (const [, name] of path[1].matchAll(/'([^']+)'/g)) {
+    assert(manifest.anchors[name]?.every(Number.isFinite), `Travel anchor ${name} exists in the rendered scene`);
+  }
+}
 const motion=source.slice(source.indexOf('function move('),source.indexOf('async function dispatchAnimation'));
 let frames=new Map(),nextFrame=0;
 const context={generation:1,reduceMotion:{matches:true},cancellations:new Set(),performance:{now:()=>0},

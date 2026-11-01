@@ -36,18 +36,20 @@ const factory = {
     }
   }
 };
-const factoryReady = fetch('/assets/factory/manifest.json').then(response => {
+const factoryReady = fetch('/assets/factory/manifest.json?v=geometry-2').then(response => {
   if (!response.ok) throw new Error('Factory asset manifest could not be loaded.');
   return response.json();
 }).then(manifest => {
   factory.manifest = manifest;
+  document.querySelector('.factory-floor').src = manifest.assets['factory-floor'].file;
+  document.documentElement.style.setProperty('--parcel-image', `url("${manifest.assets.parcel.file}")`);
   for (const [name, selector] of Object.entries({sender:'.sender',api:'.api-station',queue:'.queue-station',worker:'.worker-station',database:'.database-station'})) {
     factory.position(document.querySelector(selector), manifest.stations[name]);
   }
   factory.sprite(document.querySelector('.api-art'), 'intake-scanner', null, true);
   factory.sprite(document.querySelector('#parcel'), 'parcel', null, true);
   document.querySelector('#parcel span').style.top = `calc(var(--u) * ${manifest.assets.parcel.pivot[1] + 26})`;
-  for (const [id, names] of [['direct-route',['apiOut','dbIn']], ['queued-route',['apiOut','branch','queueIn','queue','worker','turn','dbIn']]]) {
+  for (const [id, names] of [['direct-route',['apiOut','dbApproach','dbIn']], ['queued-route',['apiOut','branch','queueIn','queue','worker','turn','dbApproach','dbIn']]]) {
     document.getElementById(id).setAttribute('d', factory.path(...names).map((p,i)=>`${i?'L':'M'}${p.join(' ')}`).join(' '));
   }
 });

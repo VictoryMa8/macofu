@@ -1,8 +1,8 @@
 # Factory asset pipeline
 
-The playable factory uses Kenney Factory Kit 3.0 models rendered into ordinary transparent PNGs. ASP.NET serves the committed exports in `wwwroot/assets/factory/`; running and building the app requires no renderer, graphics service, JavaScript package install, or 3D engine.
+The playable factory uses simple 3D geometry authored in `scripts/assets/render.py` and rendered into ordinary transparent PNGs. ASP.NET serves the committed exports in `wwwroot/assets/factory/`; running and building the app requires no renderer, graphics service, JavaScript package install, or 3D engine.
 
-The selected original GLBs, their texture, the included CC0 license, official URLs, and archive checksum live in `assets/kenney-factory-kit/`. See its `PROVENANCE.md`. The official package was inspected: 143 GLB models, with OBJ and FBX alternatives. No AI-generated artwork is used.
+The earlier Kenney Factory Kit sources and their CC0 license remain in `assets/kenney-factory-kit/` as provenance for the previous scene. The current scene does not import those models. Its belts are welded meshes, and the scanner, worker, cabinet, and parcel are beveled solids with explicit dimensions. No generated images are used.
 
 ## Regenerate
 
@@ -22,14 +22,18 @@ blender --background --python scripts/assets/render.py
 
 The verified export environment was macOS arm64, Python 3.13, `bpy` 5.2.3 LTS, and Pillow 13.0.0. Blender's native module needed execution outside the Codex filesystem sandbox on this machine. The normal app runs independently. All rendering settings and world positions are in `scripts/assets/render.py`, with exact dependency versions in `scripts/assets/requirements.txt`.
 
-The renderer uses a fixed orthographic camera at `(9, -14, 14)`, looking at `(0, -0.5, 0.3)`, orthographic width 12.6, a 5 m area light at `(-3, -4, 9)` with energy 1250, ambient fill, Standard color management, and Cycles CPU at 24 samples with denoising. It exports 2080 × 1240 RGBA PNGs for a logical 1040 × 620 canvas. Flat-color source swatches map to the site's burgundy, red, cream, navy, and blue, retaining authored UVs and geometry. The floor uses cream tonal variations.
+The renderer uses a fixed orthographic camera at `(9, -14, 14)`, looking at `(0, -0.5, 0.3)`, orthographic width 12.6, a 7 m area light at `(-3, -4, 9)` with energy 650, ambient fill, Standard color management, and Cycles CPU at 64 samples with denoising. It exports 2080 × 1240 RGBA PNGs for a logical 1040 × 620 canvas. Silver housings, graphite belts, cobalt details, and amber parcels sit on one neutral floor slab. sRGB material colors are converted to linear values before rendering to prevent washed-out highlights. Red and green appear only on the cabinet's power indicator; the adjacent HTML status also names the power state.
+
+The conveyor is one continuous welded mesh per layer, with exposed boundary faces around the branch, return path, and central opening. It has no repeated rollers or overlapping module end caps. The scanner has two posts and one crossbar. The worker uses two separated arm links and a small gripper. The storage cabinet has one shell and a flush shutter that opens for its online state; no separate doorway models intersect. Parcels have one tape strip. Keep small mechanical details out of these models so their silhouettes remain legible at lesson size.
 
 Grounding shadows are baked into the common floor using camera-invisible copies of the stations in their resting poses. Station sprites have transparent backgrounds and no duplicate floor shadow. CSS adds no shadow. Working and power states share those grounding shadows. Alpha cropping keeps four physical pixels of padding around each sprite silhouette, making parcel hit areas distinct. The manifest records each cropped image's dimensions, logical size, and ground pivot, so different poses can change bounds without jumping. No object is stretched to fit a UI box.
 
+Every manifest image URL includes a hash of that PNG's contents. The scene loads its floor and parcel animation texture from the same manifest as the machines. This prevents an older cached PNG from being stretched into a newer export's bounds. Regenerate the images and manifest together.
+
 ## Add or change an asset
 
-1. Obtain its GLB from the official package, retain the original under `assets/kenney-factory-kit/models/`, and retain any relative texture dependency. Update provenance if using a different package version.
-2. Add a `model(...)` and `export(...)` call in `scripts/assets/render.py`. Use source-model metres, the existing camera and scale, and a ground anchor. For articulated models set the authored joints' Euler rotation mode explicitly before posing them. Add reusable state names, source model names, and entrance/exit coordinates to the manifest generation.
+1. Define the asset using the renderer's `box`, `cylinder`, and `link` helpers, or add a simple manifold mesh. Keep surfaces separated and avoid unnecessary seams, repeated details, and coplanar panels.
+2. Add an `export(...)` call in `scripts/assets/render.py`. Use world-space metres, the existing camera and scale, and a ground anchor. Add reusable state names and entrance/exit coordinates to the manifest generation. Each export records its constituent geometry names; `sourceModels` is empty for code-authored assets.
 3. Run the regeneration command. Commit the source, renderer, manifest, and PNG exports together.
 4. Use `factory.sprite(...)` in `wwwroot/scene.js` to place the new sprite. Connections and travel routes must use projected manifest anchors. Adjust station controls independently of the ground pivots; never move artwork alone to repair a parcel path.
 5. Inspect desktop, mobile station navigation, keyboard focus, reduced motion, and transparent-image loading. Run the existing backend smoke test. Check that state changes and restarts interrupt travel correctly.

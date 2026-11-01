@@ -47,7 +47,7 @@ Parcel movement is immediate visual feedback around actual requests and observed
 
 Shared demo lab, with shared state across visitors and tabs and no authentication. Independent learner sessions and durable progress are not implemented. The queue is in memory, not a durable broker; the database write outage is deliberate fault injection, not a disconnected cloud service. SQLite reads used by the lab inspector remain available. Startup and restart clear all lab orders and challenge progress.
 
-The factory artwork uses recolored Kenney Factory Kit models, rendered once into static 2D sprites with shared camera and connection anchors. See [asset pipeline](docs/asset-pipeline.md) for provenance, CC0 license, regeneration, and adding assets.
+The factory artwork uses simple code-authored 3D geometry: smooth conveyor belts, a scanner arch, a two-link worker arm, and a single storage cabinet. It is rendered into static 2D sprites with shared camera and connection anchors. See [asset pipeline](docs/asset-pipeline.md) for geometry, regeneration, and adding assets. The previous Kenney model sources and their CC0 license remain in the repository for provenance.
 
 The first version used an icon diagram and prediction quiz. Rush hour replaces that interaction with a concrete routing puzzle, tactile parcels, a queue rack, a delivery worker, and a warehouse. Learning effectiveness and enjoyment still need testing.
 
