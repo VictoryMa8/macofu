@@ -22,10 +22,9 @@ public sealed class Lab : IDisposable
     private string missionId = "rush-hour";
     private string? missingOrderId;
 
-    public Lab(IWebHostEnvironment environment)
+    public Lab()
     {
-        store = new OrderStore(environment.ContentRootPath);
-        store.Clear();
+        store = new OrderStore();
     }
 
     public OrderResult AcceptOrder()

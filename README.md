@@ -1,10 +1,10 @@
 # Macofu
 
-Macofu means **Make coding fun again**: hands-on learning across full-stack software engineering. The home page presents that vision and the ambition for 20+ modules, with the order dispatch factory clearly identified as the first playable module. Its full-stack illustration is separate from the shared lab. The module library at `/modules.html` groups content into Frontend, Backend, Data, and Cloud & DevOps. Backend contains the playable order dispatch factory; other areas are explicitly planned. Category links support direct URLs such as `/modules.html#data`, keyboard navigation, and browser history. The playable lessons live at `/lesson.html`; a `mission=rush-hour` or `mission=missing-order` query selects a part, preserving progress when that part is already selected.
+Macofu means **Make coding fun again**: hands-on learning across full-stack software engineering. The home page presents that vision and the ambition for 20+ modules, with the order dispatch factory clearly identified as the first playable module. Its full-stack illustration is separate from the learner's lab. The module library at `/modules.html` groups content into Frontend, Backend, Data, and Cloud & DevOps. Backend contains the playable order dispatch factory; other areas are explicitly planned. Category links support direct URLs such as `/modules.html#data`, keyboard navigation, and browser history. The playable lessons live at `/lesson.html`; a `mission=rush-hour` or `mission=missing-order` query selects a part, preserving progress when that part is already selected.
 
 Two playable backend missions in one order dispatch factory. **Rush hour** starts with a database write outage: accept three orders without the database, then deliver those same orders after recovery. **Accepted, but missing** starts with a customer’s `202 Accepted` receipt and no saved order: follow that order through the running system and get it delivered.
 
-Live demo: [macofu.fly.dev](https://macofu.fly.dev/). Visitors share the same lab state.
+Live demo: [macofu.fly.dev](https://macofu.fly.dev/).
 
 ## Run
 
@@ -45,7 +45,11 @@ Parcel movement is immediate visual feedback around actual requests and observed
 
 ## Prototype boundaries
 
-Shared demo lab, with shared state across visitors and tabs and no authentication. Independent learner sessions and durable progress are not implemented. The queue is in memory, not a durable broker; the database write outage is deliberate fault injection, not a disconnected cloud service. SQLite reads used by the lab inspector remain available. Startup and restart clear all lab orders and challenge progress.
+Each browser receives a private factory through a random, server-issued HttpOnly cookie. Orders, queue, SQLite database, controls, evidence, and mission progress are isolated from other browsers. Reloads and tabs in the same browser share that factory; switching parts or restarting affects only it. A separate browser profile or private browsing session gets another factory. No account is required. Blocking cookies prevents progress from being retained between requests.
+
+Factories expire after two hours without lab API requests. An open lesson polls the API and keeps its session active. Expiration, clearing cookies, or an application restart begins a fresh factory; progress is not durable. Each factory uses an in-memory SQLite database and queue, not a durable broker. The database write outage is deliberate fault injection, not a disconnected cloud service; SQLite reads used by the inspector remain available. Restart clears only the current factory's orders and progress.
+
+The server defaults to 1,000 simultaneous factories and rejects new sessions with HTTP 503 when full, preserving existing learners. Idle factories release their database connections. Configure `LearnerSessions__IdleTimeout` (for example `02:00:00`) and `LearnerSessions__MaxSessions` to adjust these limits. Hosting health checks use `/healthz`, which does not create a session.
 
 The factory artwork uses simple code-authored 3D geometry: smooth conveyor belts, a scanner arch, a two-link worker arm, and a single storage cabinet. It is rendered into static 2D sprites with shared camera and connection anchors. See [asset pipeline](docs/asset-pipeline.md) for geometry, regeneration, and adding assets. The previous Kenney model sources and their CC0 license remain in the repository for provenance.
 
@@ -57,7 +61,11 @@ With the server running:
 
 ```sh
 node scripts/smoke-test.mjs
+node scripts/session-test.mjs
+node scripts/session-lifecycle-test.mjs
 node scripts/verify-factory.mjs
 ```
 
-The test resets the local lab. It checks both missions, direct-write failure, queued acceptance, pause/resume, recovery, exact order identity in completion, direct-write success, queue capacity, invalid controls and missions, source allowlisting, journey evidence and retention, and restart. It finishes at the opening Rush hour puzzle.
+The smoke test creates its own browser session. It checks both missions, direct-write failure, queued acceptance, pause/resume, recovery, exact order identity in completion, direct-write success, queue capacity, invalid controls and missions, source allowlisting, journey evidence and retention, and restart. It finishes its factory at the opening Rush hour puzzle.
+
+The session test checks two independent browsers, cross-session order and journey access, independent workers and progress, isolated resets and mission switches, and shared-cookie reload/tab continuity. The lifecycle test starts a temporary server from `bin/Debug/net10.0/Macofu.dll` (override with `MACOFU_TEST_DLL`) to verify expiration, capacity recovery, and active-session retention without changing the running app's settings.

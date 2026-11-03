@@ -1,11 +1,8 @@
 import assert from 'node:assert/strict';
+import { createLearner } from './lab-client.mjs';
 
 const origin = process.env.MACOFU_TEST_URL || 'http://127.0.0.1:5080';
-async function request(path, method = 'GET') {
-  const response = await fetch(origin + path, { method, signal: AbortSignal.timeout(5000) });
-  const text = await response.text();
-  return { status: response.status, body: text ? JSON.parse(text) : null };
-}
+const { request } = createLearner();
 async function snapshot() { return (await request('/api/state')).body; }
 async function until(predicate) {
   for (let i = 0; i < 50; i++) {

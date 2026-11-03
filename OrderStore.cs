@@ -8,12 +8,11 @@ public sealed class OrderStore : IDisposable
 {
     private readonly SqliteConnection connection;
 
-    public OrderStore(string root)
+    public OrderStore()
     {
         SQLitePCL.Batteries_V2.Init();
-        var directory = Path.Combine(root, ".data");
-        Directory.CreateDirectory(directory);
-        connection = new SqliteConnection($"Data Source={Path.Combine(directory, "orders.db")}");
+        // A private SQLite database lives as long as this learner's factory.
+        connection = new SqliteConnection("Data Source=:memory:;Pooling=False");
         connection.Open();
         using var command = connection.CreateCommand();
         command.CommandText = "CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, trace_id TEXT NOT NULL, created_at TEXT NOT NULL)";

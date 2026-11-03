@@ -1,6 +1,6 @@
 namespace Macofu;
 
-public sealed class OrderWorker(Lab lab) : BackgroundService
+public sealed class OrderWorker(LearnerLabs learners) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -8,7 +8,7 @@ public sealed class OrderWorker(Lab lab) : BackgroundService
         while (await timer.WaitForNextTickAsync(stoppingToken))
         {
             // A request can return while this independent consumer is paused.
-            lab.ProcessNext();
+            learners.ProcessNext();
         }
     }
 }

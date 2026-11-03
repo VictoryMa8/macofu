@@ -437,7 +437,7 @@ document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener
   target.scrollIntoView({block:'nearest',inline:'center',behavior:reduceMotion.matches?'instant':'smooth'});
 }));
 
-const sources={handler:{focus:'app.MapPost("/api/orders"',description:'Receives each order request and sends a reply to the customer.'},queue:{focus:'if (route == "direct")',description:'Chooses between saving an order immediately and holding it for later.'},worker:{focus:'lab.ProcessNext()',description:'Checks for waiting orders and tries to save the next one.'},database:{focus:'command.CommandText = "INSERT',description:'Adds orders to the saved records in SQLite, the database used here.'}};
+const sources={handler:{focus:'app.MapPost("/api/orders"',description:'Receives each order request and sends a reply to the customer.'},queue:{focus:'if (route == "direct")',description:'Chooses between saving an order immediately and holding it for later.'},worker:{focus:'learners.ProcessNext()',description:'Checks each factory for waiting orders and tries to save the next one.'},database:{focus:'command.CommandText = "INSERT',description:'Adds orders to the saved records in SQLite, the database used here.'}};
 
 async function openJourney(id) {
   closeCode(false); closeTool(false); inspectedTarget=true;
@@ -522,7 +522,7 @@ function closeCode(focus=true) {
 $('#close-code').addEventListener('click',()=>closeCode());
 $('#show-guide').addEventListener('click',()=>closeCode());
 async function poll(){if(!busy)await refresh();setTimeout(poll,350);}
-// Landing-page links select a part once; ordinary polling preserves shared progress.
+// Landing-page links select a part once; ordinary polling preserves this browser's progress.
 let requestedMission = new URLSearchParams(location.search).get('mission');
 if (!['rush-hour', 'missing-order'].includes(requestedMission)) requestedMission = null;
 factoryReady.then(()=>{render();poll();}).catch(report);

@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { join, relative } from 'node:path';
 
-// Read-only verification: leave the shared production lesson state alone.
+// Verify web assets and source without changing another learner's factory.
 const root = new URL('../wwwroot/', import.meta.url);
 const origin = process.env.MACOFU_DEPLOY_URL || 'https://macofu.fly.dev';
 const revision = process.env.GITHUB_SHA || Date.now().toString();
@@ -46,4 +46,6 @@ for (const [name, file] of Object.entries({ handler: 'Program.cs', queue: 'Lab.c
 
 const state = JSON.parse((await readRemote('/api/state')).toString());
 assert(Array.isArray(state.queue) && Array.isArray(state.orders), 'Live lesson API returns its expected state');
+const health = JSON.parse((await readRemote('/healthz')).toString());
+assert.equal(health.status, 'ok', 'Session-free hosting health check is healthy');
 console.log(`PASS: all ${paths.length} web assets and all 4 source files match this commit; live lesson API is healthy.`);

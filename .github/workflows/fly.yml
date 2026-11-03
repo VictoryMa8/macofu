@@ -43,20 +43,22 @@ jobs:
       - name: Build the application
         run: dotnet build --configuration Release
 
-      - name: Verify both lessons in a local test lab
+      - name: Verify lessons and independent learner sessions
         shell: bash
         run: |
           dotnet run --configuration Release --no-build --no-launch-profile --urls http://127.0.0.1:5080 > /tmp/macofu-test.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
           for attempt in {1..30}; do
-            if curl --fail --silent http://127.0.0.1:5080/api/state > /dev/null; then
+            if curl --fail --silent http://127.0.0.1:5080/healthz > /dev/null; then
               break
             fi
             sleep 1
           done
-          curl --fail --silent http://127.0.0.1:5080/api/state > /dev/null || { cat /tmp/macofu-test.log; exit 1; }
+          curl --fail --silent http://127.0.0.1:5080/healthz > /dev/null || { cat /tmp/macofu-test.log; exit 1; }
           node scripts/smoke-test.mjs
+          node scripts/session-test.mjs
+          MACOFU_TEST_DLL=bin/Release/net10.0/Macofu.dll node scripts/session-lifecycle-test.mjs
 
       - name: Set up Fly CLI
         uses: superfly/flyctl-actions/setup-flyctl@98172f70657cb3e15db199af139be99bd3e61200

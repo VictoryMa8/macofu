@@ -31,13 +31,15 @@ fly apps create --generate-name
 fly deploy --app YOUR_APP_NAME --remote-only --ha=false
 ```
 
-The `--ha=false` option creates one application machine. Keep one machine: the learning lab holds its queue and progress in that process. Its SQLite database is temporary, and the existing app deliberately clears orders on startup and restart. An idle machine stops automatically and starts again on the next request, beginning a fresh lab. A separate persistent database or volume is not needed for this demo.
+The `--ha=false` option creates one application machine. Keep one machine: learner sessions, queues, and progress live in that process, with a separate in-memory SQLite database for each factory. An application restart loses all sessions. An idle machine stops automatically and starts again on the next request, beginning fresh labs. A separate persistent database or volume is not needed for this demo. Multiple application instances would require shared session storage or routing each learner consistently to the same instance.
 
 The configuration uses HTTPS, Chicago, one shared CPU, and 512 MB of memory. Hosting usage is billed by Fly.io under the account's current plan; stopping an idle machine reduces running time.
 
 ## Demo behavior
 
-This is a shared demo. Visitors use the same lab state, and anyone can restart it or change the active mission. It does not collect accounts or personal data. Independent learner sessions and durable progress require additional application work.
+Each browser has its own factory, including its orders, database, queue, controls, mission progress, and request evidence. A random HttpOnly, SameSite=Strict cookie identifies the factory; HTTPS connections use Secure cookies, including HTTPS forwarded by Fly Proxy. Tabs in the same browser share a factory. Restart and mission changes affect only that browser. There are no accounts and progress is not durable.
+
+Factories expire after two hours without lab API requests; open lessons keep their sessions active by polling. Idle cleanup disposes the factory's SQLite connection. The default limit is 1,000 factories; new sessions receive HTTP 503 with Retry-After when full, while existing sessions continue. Override with `LearnerSessions__IdleTimeout` and `LearnerSessions__MaxSessions`. `/healthz` and source inspection do not create factories; Fly health checks use `/healthz` to avoid allocating idle sessions.
 
 ## Verify a deployment
 
@@ -45,13 +47,14 @@ This is a shared demo. Visitors use the same lab state, and anyone can restart i
 node scripts/verify-deployment.mjs
 ```
 
-This checks that the live app matches the local checkout without changing the shared lesson. To exercise both lessons against production explicitly:
+This checks that the live app matches the local checkout. To exercise both lessons against production explicitly:
 
 ```sh
 MACOFU_TEST_URL=https://macofu.fly.dev node scripts/smoke-test.mjs
+MACOFU_TEST_URL=https://macofu.fly.dev node scripts/session-test.mjs
 ```
 
-The smoke test exercises both missions and resets the remote demo's lab state. Open the deployment in a browser and check the factory assets, new logo, and source inspector as well.
+The tests exercise their own learner factories; restarts do not affect other visitors. The session test verifies independent browser identities and factory state. Open the deployment in a browser and check the factory assets, logo, and source inspector as well.
 
 Verified November 1, 2026: the remote container build succeeded, Fly.io reported one running machine in `ord` with its health check passing, and all existing mission smoke checks passed against the HTTPS deployment. The public page rendered the factory and Curiosity Spark logo, and the Code inspector displayed the packaged C# source. The browser reported no warnings or errors. The smoke test left the demo at the opening Rush hour puzzle. See [deployment screenshot](screenshots/macofu-deployed.png).
 
