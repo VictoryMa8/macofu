@@ -2,12 +2,12 @@ const $ = selector => document.querySelector(selector);
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let state = { route:'direct', paused:false, databaseOnline:false, queue:[], orders:[], events:[], rejected:0, mission:{protectedCount:0,delivered:0,target:3,complete:false} };
 let connected = false, busy = false, generation = 0, revision = 0, initialized = false, won = false;
-let sourceRequest = 0, selectedSource = 'handler', sourceCache = {}, lastEvents = '', lastRack = '', lastGoals = '';
+let sourceRequest = 0, selectedSource = 'handler', sourceCache = {}, lastEvents = '', lastRack = '';
 const workingOrders = new Set();
 const savedSeen = new Set(), arrivals = new Map(), moving = new Set(), cancellations = new Set();
 let drag = null, suppressClick = false;
 let selectedOrder = null, journeyRequest = 0, journeySignature = '', lastOrderList = '';
-let studyPhase = 'try', guideAction = 'send', inspectedTarget = false;
+let studyPhase = 'try', guideAction = 'send';
 const isMissing = () => state.mission.id === 'missing-order';
 const setText = (selector, text) => { if ($(selector).textContent !== text) $(selector).textContent = text; };
 const escapeHtml = value => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -21,6 +21,7 @@ async function request(path, method='GET') {
 function buttons() {
   document.querySelectorAll('#start-lesson,#parcel,#route-direct,#route-queue,#worker-toggle,#database-toggle,#reset,[data-mission]').forEach(button=>{button.disabled=!connected||busy;});
   $('#guide-action').disabled=!connected||busy||guideAction==='wait';
+  $('#check-diagnosis').disabled=!connected||busy;
 }
 function feedback(text) { $('#game-feedback').textContent=text; }
 function report(error) { $('#error').textContent=error.message||String(error); $('#error').hidden=false; }
@@ -52,17 +53,14 @@ function render() {
   if($('#mission-title').textContent!==title)$('#mission-title').textContent=title;
   document.querySelectorAll('[data-mission]').forEach(button=>button.setAttribute('aria-pressed',button.dataset.mission===state.mission.id || (!state.mission.id&&button.dataset.mission==='rush-hour')));
   $('#inspect-target').hidden=!missing;
-  $('#protect-goal').hidden=missing;
   setText('#lesson-description', missing
     ? 'The shop accepted a customer’s order. It never reached the saved records.'
     : 'Customers are placing orders. Your shop can’t save them.');
   setText('#lesson-context',missing
-    ? 'The software received the customer’s purchase order, but it hasn’t reached the database, where the shop keeps its records. Trace that order through the factory and find what is stopping it from being saved.'
-    : 'The database, where the shop stores its orders, is offline. You’ll use the factory controls to keep three customer purchase orders safe, then bring the database back and save them.');
-  setText('#goals-heading', title);
-  setText('#goals-description', missing?'Save the reported customer order to complete this part.':'Both tasks use the same three customer orders.');
-  setText('#deliver-label', missing?'Save the missing customer order':'Save those same 3 orders');
-  setText('#deliver-description', missing?'Inspect the reported order and get it from the queue into the database.':'Restore the database so the worker can save the waiting orders.');
+    ? 'Start by inspecting the customer’s purchase order. Its receipt says the software took the request, but the shop can’t find it in the database where it stores orders. Explain the delay from the factory evidence, then use the controls to save and verify that same order.'
+    : 'The database, where the shop stores its orders, is offline. Send a test purchase order to see the failure. Then use the factory controls to keep three customer orders safe and save those same orders when the database is back.');
+  setText('#goals-heading', `Part ${missing?'2':'1'} of 2 · ${title}`);
+  setText('#goals-description', missing?'Both goals use the purchase order the customer reported.':'Both goals use the same three customer orders.');
   if(missing&&$('#http-result').textContent==='Ready')$('#http-result').textContent='The customer’s order was accepted into the queue (HTTP 202).';
   $('#http-result').hidden=$('#http-result').textContent==='Ready';
   $('#scene').classList.toggle('route-queue',state.route==='queue');
@@ -90,17 +88,18 @@ function render() {
 
   }
 $('#queue-rack').setAttribute('aria-label',`${state.queue.length} orders waiting in the queue`);
-  const target=state.mission.target;
-  const protectedCount=missing?(state.mission.targetOrderId?1:0):state.mission.protectedCount;
-  const goals=`${state.mission.id}-${protectedCount}-${state.mission.delivered}`;
-  if (lastGoals!==goals) {
-    lastGoals=goals;
-    for (const [id,count] of [['protect',protectedCount],['deliver',state.mission.delivered]]) {
-      $(`#${id}-goal`).classList.toggle('done',count===target);
-      const pending=id==='deliver'&&!missing&&protectedCount<target&&count===0;
-      $(`#${id}-goal`).classList.toggle('current',count<target&&!pending);
-      $(`#${id}-progress`).textContent=`${count} of ${target} ${id==='protect'?'accepted':'saved'}. ${count===target?'Complete':pending?'Up next':'In progress'}.`;
-    }
+  const {target, protectedCount, delivered, diagnosed, verified}=state.mission;
+  for (const [id, visible, count, total, unit, pending] of [
+    ['protect', !missing, protectedCount, target, 'accepted', false],
+    ['deliver', !missing, delivered, target, 'saved', protectedCount<target&&delivered===0],
+    ['diagnose', missing, diagnosed?1:0, 1, 'explained', false],
+    ['verify', missing, verified?1:0, 1, 'verified', !diagnosed]
+  ]) {
+    const goal=$(`#${id}-goal`);
+    goal.hidden=!visible;
+    if(!visible)continue;
+    goal.classList.toggle('done',count===total);
+    setText(`#${id}-progress`,`${count} of ${total} ${unit}. ${count===total?'Complete':pending?'Pending':'In progress'}.`);
   }
   const signature=JSON.stringify(state.events);
   if (signature!==lastEvents) {
@@ -126,22 +125,25 @@ function renderGuide() {
   if(!missing&&accepted===3&&(state.databaseOnline||saved>0))studyPhase='save';
   let title, body, label, action, hint;
   if(state.mission.complete) {
-    title=missing?'The missing order is saved.':'All three orders are saved.';
-    body=missing?'You found the waiting order and helped it reach the database. Accepted and saved are two different moments.':'The shop kept 3 orders during the outage and saved those same orders after recovery.';
-    [label,action]=missing?['Try this part again','reset']:['Continue to Part 2','next-part'];
+    title=missing?'You found and verified the order.':'All three orders are saved.';
+    body=missing?'The original receipt still says 202 Accepted. The lookup now says 200 OK because the same purchase order is saved.':'The shop kept 3 orders during the outage and saved those same orders after recovery.';
+    [label,action]=missing?['Review order evidence','inspect-order']:['Continue to Part 2','next-part'];
     hint='Choose Source code above the factory to see how the software handled these orders.';
   } else if(missing) {
-    if(!inspectedTarget) {
-      title='Follow the customer’s order'; body='Start with its journey. Accepted means the software received the request; saved means the order reached the database.';
-      label='Inspect customer order'; action='inspect-order'; hint='Look for the stage where this order is waiting. You do not need to send another order.';
+    if(!state.mission.diagnosed) {
+      title='Find out what held up the order'; body='Compare the customer’s receipt with the factory’s state when the order arrived. Each parcel represents a purchase order.';
+      label='Inspect customer order'; action='inspect-order'; hint='Look at the receipt, the waiting line, and which parts of the factory were ready.';
+    } else if(saved) {
+      title='Check the saved record'; body='The worker saved the reported order. Look it up by its order ID, the number and letters the shop uses to identify it.';
+      label='Verify saved order'; action='verify-order'; hint='Compare the original receipt with the reply from looking up this same order.';
     } else if(!state.databaseOnline) {
       title='Restore the database'; body='The database stores finished orders. It is offline, so the waiting order cannot be saved yet.';
       label='Restore database'; action='restore'; hint='Use Restore database in the factory or the button above.';
     } else if(state.paused) {
-      title='Start the worker'; body='The worker is a background program that takes orders from the queue. It is paused. Start it to save this order.';
+      title='Start the worker'; body='You found the cause. Start the worker, the background program that takes orders from the queue, so it can save this purchase order.';
       label='Start worker'; action='resume'; hint='The database is ready. The paused worker is keeping the order in the queue.';
     } else {
-      title='Watch the order reach storage'; body='The worker is running. It will take the waiting order and save it in the database.';
+      title='Watch the order reach storage'; body='The worker is running. It will take the purchase order from the queue and save it in the database.';
       label='Saving the order…'; action='wait'; hint='Watch the database’s saved count and the order journey.';
     }
   } else if(accepted===3&&studyPhase!=='save') {
@@ -271,12 +273,15 @@ async function sendOrder() {
   }catch(error){report(error);}
   finally{if(!visualStarted)el.remove();busy=false;buttons();}
 }
-async function control(path,notice) {
+async function control(path,notice,onFailure) {
   if(busy||!connected)return;
   busy=true;revision++;buttons();$('#error').hidden=true;
   try{
     const result=await request(path,'POST');
-    if(result.status!==200)throw new Error(`Control failed (${result.status})`);
+    if(result.status!==200){
+      if(onFailure?.(result.status))return false;
+      throw new Error(`Action failed (HTTP ${result.status}).`);
+    }
     apply(result.body);if(notice)feedback(notice);
     return true;
   }catch(error){report(error);return false;}finally{busy=false;buttons();}
@@ -287,7 +292,7 @@ function clearVisuals() {
   selectedOrder=null;journeyRequest++;journeySignature='';
   $('#journey').hidden=true;
   $('.guide-card').hidden=false;
-  studyPhase='try'; inspectedTarget=false;
+  studyPhase='try';
   closeCode(false); closeTool(false); setRouteChoices(false); setLessonStarted(false);
   $('.lesson-options').open=false;
   [...cancellations].forEach(cancel=>cancel());
@@ -402,8 +407,12 @@ $('#guide-action').addEventListener('click',async()=>{
     case 'outage': await control('/api/database/offline','Database offline.'); break;
     case 'resume': await control('/api/worker/resume','Worker started.'); break;
     case 'inspect-order': await openJourney(state.mission.targetOrderId); break;
+    case 'verify-order': {
+      const id=state.mission.targetOrderId;
+      if(await control(`/api/journeys/${id}/verify`) && state.mission.targetOrderId===id)await openJourney(id);
+      break;
+    }
     case 'next-part': await reset('missing-order'); break;
-    case 'reset': await reset(); break;
   }
 });
 const toolTitles={help:'Help with this step',progress:'Lesson progress',definitions:'Factory guide',history:'Request history'};
@@ -440,13 +449,17 @@ document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener
 const sources={handler:{focus:'app.MapPost("/api/orders"',description:'Receives each order request and sends a reply to the customer.'},queue:{focus:'if (route == "direct")',description:'Chooses between saving an order immediately and holding it for later.'},worker:{focus:'learners.ProcessNext()',description:'Checks each factory for waiting orders and tries to save the next one.'},database:{focus:'command.CommandText = "INSERT',description:'Adds orders to the saved records in SQLite, the database used here.'}};
 
 async function openJourney(id) {
-  closeCode(false); closeTool(false); inspectedTarget=true;
+  closeCode(false); closeTool(false);
   $('.lesson-options').open=false;
   $('.guide-card').hidden=true;
   selectedOrder=id;journeySignature='';
   $('#journey').hidden=false;
   $('#journey-heading').textContent=`Order #${id}`;
   $('#journey-content').textContent='Loading live evidence…';
+  $('#journey-replies').hidden=true;
+  $('#diagnosis').hidden=true;
+  $('#diagnosis').reset();
+  setText('#diagnosis-feedback','');
   $('#journey-heading').focus({preventScroll:true});
   revealTool($('#journey'));
   await refreshJourney();
@@ -460,16 +473,36 @@ async function refreshJourney() {
     if(result.status!==200)throw new Error('This order is no longer in the lab. Choose an order from the current mission.');
     if(![200,404].includes(lookup.status))throw new Error(`Order lookup failed (HTTP ${lookup.status}).`);
     const journey=result.body;
-    const signature=JSON.stringify([journey,lookup.status]);
+    // Delivery can happen between the two reads. Render a matching pair on the next poll.
+    if((journey.location==='database')!==(lookup.status===200))return;
+    const isTarget=isMissing()&&id===state.mission.targetOrderId;
+    const verified=isTarget&&state.mission.verified;
+    const initial=journey.events.find(event=>event.kind==='initial-state');
+    $('#diagnosis').hidden=!isTarget||state.mission.diagnosed||!initial;
+    if(!$('#diagnosis').hidden)setText('#diagnosis-evidence',initial.message);
+    const signature=JSON.stringify([journey,lookup.status,verified]);
     if(signature===journeySignature)return;
     journeySignature=signature;
     const location=journey.location;
     const waiting=location==='queue'?(journey.paused?'Worker paused':!journey.databaseOnline?'Database unavailable':'Worker ready to process'):location==='database'?'Saved in SQLite':'Request rejected';
-    const stages=[['API',`HTTP ${journey.httpStatus}`,true,'handler'],['Queue',journey.route==='queue'&&journey.httpStatus===202?(location==='queue'?'Order waiting':'Consumed'):'Not enqueued',journey.route==='queue'&&journey.httpStatus===202,'queue'],['Worker',journey.events.some(event=>event.kind==='consumed')?'Processed':location==='queue'?waiting:'No queued work',journey.events.some(event=>event.kind==='consumed'),'worker'],['Database',lookup.status===200?'Order found':'Order not found',lookup.status===200,'database']];
+    const stages=[['API',isTarget?'Request accepted':`HTTP ${journey.httpStatus}`,true,'handler'],['Queue',journey.route==='queue'&&journey.httpStatus===202?(location==='queue'?'Order waiting':'Processed'):'Not enqueued',journey.route==='queue'&&journey.httpStatus===202,'queue'],['Worker',journey.events.some(event=>event.kind==='consumed')?'Processed':location==='queue'?waiting:'No queued work',journey.events.some(event=>event.kind==='consumed'),'worker'],['Database',lookup.status===200?'Order found':'Order not found',lookup.status===200,'database']];
+    if(isTarget){
+      setText('#receipt-status',`HTTP ${journey.httpStatus} Accepted`);
+      setText('#lookup-status',lookup.status===200?'HTTP 200 OK':'HTTP 404 Not Found');
+      setText('#lookup-meaning',verified
+        ? 'The database found the same purchase order. Part 2 complete.'
+        : lookup.status===200?'The database found the saved purchase order.':'The database has no saved record for this order ID.');
+      $('#journey-replies').hidden=false;
+    }
     const expanded=$('#journey-content .journey-events')?.open;
-    $('#journey-content').innerHTML=`<div class="journey-facts">Trace <code>${escapeHtml(journey.traceId)}</code></div><ol class="journey-stages">${stages.map(([label,detail,done,source])=>`<li class="${done?'reached':''}"><button data-journey-source="${source}" aria-label="Inspect ${label} source code">${label} ↗</button><span>${escapeHtml(detail)}</span></li>`).join('')}</ol><p class="lookup-result"><code>GET /api/orders/${escapeHtml(id)}</code> → <strong>HTTP ${lookup.status}</strong></p><details class="journey-events"${expanded?' open':''}><summary>Events</summary><ol>${journey.events.map(event=>`<li><time>${escapeHtml(event.time)}</time><strong>${escapeHtml(event.component)}</strong><span>${escapeHtml(event.message)}</span></li>`).join('')}</ol></details>`;
+    $('#journey-content').innerHTML=`<ol class="journey-stages">${stages.map(([label,detail,done,source])=>`<li class="${done?'reached':''}"><button data-journey-source="${source}" aria-label="Inspect ${label} source code">${label} ↗</button><span>${escapeHtml(detail)}</span></li>`).join('')}</ol><details class="journey-events"${expanded?' open':''}><summary>Request details and events</summary><p class="journey-facts">Trace <code>${escapeHtml(journey.traceId)}</code></p><p class="lookup-result"><code>GET /api/orders/${escapeHtml(id)}</code> → <strong>HTTP ${lookup.status}</strong></p><ol>${journey.events.map(event=>`<li><time>${escapeHtml(event.time)}</time><strong>${escapeHtml(event.component)}</strong><span>${escapeHtml(event.message)}</span></li>`).join('')}</ol></details>`;
   } catch(error) {
-    if(token===journeyRequest){journeySignature='';$('#journey-content').textContent=error.message;}
+    if(token===journeyRequest){
+      journeySignature='';
+      $('#journey-content').textContent=error.message;
+      $('#journey-replies').hidden=true;
+      $('#diagnosis').hidden=true;
+    }
   }
 }
 document.addEventListener('click',event=>{
@@ -479,10 +512,26 @@ document.addEventListener('click',event=>{
   if(source)void inspect(source.dataset.journeySource);
 });
 $('#inspect-target').addEventListener('click',()=>{if(state.mission.targetOrderId)void openJourney(state.mission.targetOrderId);});
-$('#close-journey').addEventListener('click',()=>{
+function closeJourney() {
   selectedOrder=null;journeyRequest++;$('#journey').hidden=true;
   $('.guide-card').hidden=false; renderGuide(); buttons();
-  $('#guide-action').focus({preventScroll:true});
+  $('#guide-title').focus({preventScroll:true});
+  revealTool($('.guide-card'));
+}
+$('#close-journey').addEventListener('click',closeJourney);
+$('#diagnosis').addEventListener('submit',async event=>{
+  event.preventDefault();
+  const id=selectedOrder;
+  if(!id||id!==state.mission.targetOrderId)return;
+  const cause=new FormData(event.currentTarget).get('cause');
+  const wrongAnswer=status=>{
+    if(status!==422)return false;
+    setText('#diagnosis-feedback',cause==='database-offline'
+      ? 'The database was online and could save orders. Look at the program that moves orders out of the queue.'
+      : 'The receipt shows the order entered the queue. Look for what kept it waiting there.');
+    return true;
+  };
+  if(await control(`/api/journeys/${id}/diagnosis/${encodeURIComponent(cause)}`,'Cause confirmed.',wrongAnswer) && selectedOrder===id)closeJourney();
 });
 function highlight(line){return line.split(/(\/\/.*$|"(?:[^"\\]|\\.)*"|\b(?:var|return|public|private|new|using|namespace|class|sealed|record|void|if|else|lock|async|await|protected|override|while|true|false|null)\b)/g).map(token=>{const safe=escapeHtml(token);return token.startsWith('//')?`<span class="code-comment">${safe}</span>`:token.startsWith('"')?`<span class="code-string">${safe}</span>`:/^(var|return|public|private|new|using|namespace|class|sealed|record|void|if|else|lock|async|await|protected|override|while|true|false|null)$/.test(token)?`<span class="code-keyword">${safe}</span>`:safe;}).join('');}
 async function inspect(name){

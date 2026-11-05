@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f7f7f2"><title>Macofu — Rush hour</title>
-  <link rel="icon" type="image/svg+xml" href="/icon.svg?v=mint-1"><link rel="stylesheet" href="/theme.css?v=1"><link rel="stylesheet" href="/style.css?v=landing-1"><script src="/scene.js?v=geometry-8" defer></script><script src="/app.js?v=geometry-11" defer></script>
+  <link rel="icon" type="image/svg+xml" href="/icon.svg?v=mint-1"><link rel="stylesheet" href="/theme.css?v=1"><link rel="stylesheet" href="/style.css?v=investigation-1"><script src="/scene.js?v=geometry-8" defer></script><script src="/app.js?v=investigation-1" defer></script>
 </head>
 <body>
   <header><a class="brand" href="/" aria-label="Macofu home"><img class="brand-mark" src="/icon.svg?v=mint-1" width="48" height="36" alt="" aria-hidden="true">macofu</a><a class="quiet" href="/modules.html#backend">← All modules</a></header>
   <main>
-    <nav class="mission-nav" aria-label="Order dispatch lesson parts"><button data-mission="rush-hour" aria-pressed="true"><span>Part 1</span> Rush hour</button><button data-mission="missing-order" aria-pressed="false"><span>Part 2</span> Accepted, but missing</button></nav>
-    <section class="intro" aria-labelledby="mission-title"><h1 id="mission-title" tabindex="-1">Rush hour</h1><div class="intro-copy"><p class="lesson-description" id="lesson-description">Customers are placing orders. Your shop can’t save them.</p><p class="lesson-context" id="lesson-context">The database, where the shop stores its orders, is offline. You’ll use the factory controls to keep three customer purchase orders safe, then bring the database back and save them.</p><button id="start-lesson" class="solid" disabled>Start lesson</button></div></section>
+    <nav class="mission-nav" aria-label="Order dispatch lesson parts"><button data-mission="rush-hour" aria-pressed="true"><span>Part 1 of 2</span> Rush hour</button><button data-mission="missing-order" aria-pressed="false"><span>Part 2 of 2</span> Accepted, but missing</button></nav>
+    <section class="intro" aria-labelledby="mission-title"><h1 id="mission-title" tabindex="-1">Rush hour</h1><div class="intro-copy"><p class="lesson-description" id="lesson-description">Customers are placing orders. Your shop can’t save them.</p><p class="lesson-context" id="lesson-context">The database, where the shop stores its orders, is offline. Send a test purchase order to see the failure. Then use the factory controls to keep three customer orders safe and save those same orders when the database is back.</p><button id="start-lesson" class="solid" disabled>Start lesson</button></div></section>
     <div class="lesson-toolbar" hidden><div class="workspace-tabs" role="group" aria-label="Lesson workspace"><button id="show-guide" aria-pressed="true">Factory</button><button id="open-code" aria-pressed="false" aria-expanded="false" aria-controls="inspector">Source code</button></div><details class="lesson-options"><summary>Help &amp; tools</summary><div class="tools-menu"><button data-tool="help">Help with this step</button><button data-tool="progress">Lesson progress</button><button data-tool="definitions">Factory guide</button><button data-tool="history">Request history</button><button id="inspect-target" hidden>Inspect customer order</button><button id="reset">Restart this part</button></div></details></div>
     <div id="connection" class="connection-error" role="status" hidden>Connection lost. Reconnecting…</div>
     <div class="workspace" hidden>
@@ -39,12 +39,33 @@
         <div data-tool-content="help" hidden><p id="hint"></p></div>
         <div data-tool-content="progress" class="goals" hidden><h3 id="goals-heading">Rush hour progress</h3><p id="goals-description">Both tasks use the same three customer orders.</p><div class="objectives" aria-live="polite" aria-atomic="true">
           <div class="objective" id="protect-goal"><strong>Keep 3 orders during the outage</strong><p>Accept each order into the queue while the database is offline.</p><span class="goal-progress" id="protect-progress">0 of 3 accepted. In progress.</span></div>
-          <div class="objective" id="deliver-goal"><strong id="deliver-label">Save those same 3 orders</strong><p id="deliver-description">Restore the database so the worker can save the waiting orders.</p><span class="goal-progress" id="deliver-progress">0 of 3 saved. Up next.</span></div>
+          <div class="objective" id="deliver-goal"><strong>Save those same 3 orders</strong><p>Restore the database so the worker can save the waiting orders.</p><span class="goal-progress" id="deliver-progress">0 of 3 saved. Pending.</span></div>
+          <div class="objective" id="diagnose-goal" hidden><strong>Explain why the order was missing</strong><p>Use the reported order’s receipt and the factory’s state when it arrived.</p><span class="goal-progress" id="diagnose-progress"></span></div>
+          <div class="objective" id="verify-goal" hidden><strong>Save and verify the reported order</strong><p>Get that purchase order into the database and check that the saved record can be found.</p><span class="goal-progress" id="verify-progress"></span></div>
         </div></div>
         <div data-tool-content="definitions" hidden><div class="term-tabs" role="group" aria-label="Factory component"><button data-term="order" aria-pressed="true">Parcel</button><button data-term="api" aria-pressed="false">API</button><button data-term="queue" aria-pressed="false">Queue</button><button data-term="worker" aria-pressed="false">Worker</button><button data-term="database" aria-pressed="false">Database</button></div><p id="term-description">Each parcel is data about one customer’s purchase. Send order creates a test order; no real purchase is made.</p></div>
         <div data-tool-content="history" hidden><p>A record of what the software did after each action.</p><p id="history-empty">No activity yet. Send an order to see how the software responds.</p><p id="http-result" class="http-result" hidden>Ready</p><div class="order-tray" hidden><h3>Inspect an order</h3><div id="order-list"></div></div><div id="events"></div></div>
       </section>
-      <section class="journey" id="journey" hidden aria-labelledby="journey-heading"><div class="inspector-top"><h2 id="journey-heading" tabindex="-1">Order journey</h2><button id="close-journey" class="quiet">Back to next step</button></div><p class="journey-help">Follow this order from acceptance to storage. Accepted means the system took the request; saved means it reached the database.</p><div id="journey-content" aria-live="polite"></div></section>
+      <section class="journey" id="journey" hidden aria-labelledby="journey-heading">
+        <div class="inspector-top"><h2 id="journey-heading" tabindex="-1">Order journey</h2><button id="close-journey" class="quiet">Back to next step</button></div>
+        <p class="journey-help">HTTP is how the browser and server exchange requests and replies. Each reply has a number that describes its result.</p>
+        <dl class="journey-replies" id="journey-replies" aria-live="polite" hidden>
+          <div><dt>Original receipt</dt><dd><strong id="receipt-status"></strong><span>The order entered the queue, a waiting line for work.</span></dd></div>
+          <div><dt>Current order lookup</dt><dd><strong id="lookup-status"></strong><span id="lookup-meaning"></span></dd></div>
+        </dl>
+        <form id="diagnosis" hidden>
+          <fieldset>
+            <legend>What held up this order?</legend>
+            <p id="diagnosis-evidence"></p>
+            <label><input type="radio" name="cause" value="database-offline" required> The database could not save orders.</label>
+            <label><input type="radio" name="cause" value="worker-paused"> The program that moves orders from the queue was paused.</label>
+            <label><input type="radio" name="cause" value="api-rejected"> The software rejected the order when it arrived.</label>
+          </fieldset>
+          <button class="solid" id="check-diagnosis">Check explanation</button>
+          <p id="diagnosis-feedback" role="status"></p>
+        </form>
+        <div id="journey-content" aria-live="polite"></div>
+      </section>
     </aside>
       <section class="inspector" id="inspector" hidden aria-labelledby="code-heading"><div class="tool-heading"><div><h2 id="code-heading">Code behind the factory</h2><p id="source-description">API code receives each order request.</p></div><button id="close-code" class="quiet" aria-label="Close code inspector">×</button></div><div class="inspector-top"><div class="code-tabs" role="group" aria-label="Source file"><button data-source="handler">API</button><button data-source="queue">Queue</button><button data-source="worker">Worker</button><button data-source="database">Database</button></div></div><pre tabindex="0" aria-label="Source code; scroll to read more"><code id="source-code"></code></pre></section>
     </div>

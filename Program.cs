@@ -90,6 +90,20 @@ app.MapPost("/api/missions/{id}", (string id, LearnerSession learner) =>
 app.MapGet("/api/journeys/{id}", (string id, LearnerSession learner) =>
     learner.Lab.FindJourney(id) is { } journey ? Results.Ok(journey) : Results.NotFound());
 
+app.MapPost("/api/journeys/{id}/diagnosis/{cause}", (string id, string cause, LearnerSession learner) =>
+{
+    var lab = learner.Lab;
+    var status = lab.DiagnoseMissingOrder(id, cause);
+    return status == 200 ? Results.Ok(lab.Snapshot()) : Results.StatusCode(status);
+});
+
+app.MapPost("/api/journeys/{id}/verify", (string id, LearnerSession learner) =>
+{
+    var lab = learner.Lab;
+    var status = lab.VerifyMissingOrder(id);
+    return status == 200 ? Results.Ok(lab.Snapshot()) : Results.StatusCode(status);
+});
+
 app.MapPost("/api/route/{route}", (string route, LearnerSession learner) =>
 {
     var lab = learner.Lab;

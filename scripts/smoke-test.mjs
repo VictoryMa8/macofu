@@ -86,34 +86,53 @@ try {
   assert.equal(state.queue[0].id, missingId);
   assert.equal(state.orders.length, 0);
   assert.equal(state.mission.complete, false);
+  assert.equal(state.mission.diagnosed, false);
+  assert.equal(state.mission.verified, false);
   assert.equal((await request(`/api/orders/${missingId}`)).status, 404);
   let journey = (await request(`/api/journeys/${missingId}`)).body;
   assert.equal(journey.httpStatus, 202);
   assert.equal(journey.location, 'queue');
   assert.equal(journey.paused, true);
-  assert.deepEqual(journey.events.map(event => event.kind), ['request', 'enqueued', 'accepted']);
+  const openingEvents = ['request', 'enqueued', 'accepted', 'initial-state'];
+  assert.deepEqual(journey.events.map(event => event.kind), openingEvents);
+  assert.match(journey.events.at(-1).message, /database was online and the worker was paused/);
   assert(journey.events.every(event => event.traceId === state.queue[0].traceId));
   assert.equal((await request('/api/journeys/unknown')).status, 404);
 
   await request('/api/route/direct', 'POST');
   const unrelated = await request('/api/orders', 'POST');
   assert.equal(unrelated.status, 201);
+  const otherJourney = `/api/journeys/${unrelated.body.orderId}`;
+  assert.equal((await request(otherJourney)).status, 200);
+  assert.equal((await request(`${otherJourney}/diagnosis/worker-paused`, 'POST')).status, 404);
+  assert.equal((await request(`${otherJourney}/verify`, 'POST')).status, 404);
   assert.equal((await snapshot()).mission.complete, false, 'A different saved order cannot complete the missing-order mission');
+  const targetJourney = `/api/journeys/${missingId}`;
+  assert.equal((await request(`${targetJourney}/diagnosis/database-offline`, 'POST')).status, 422);
+  assert.equal((await snapshot()).mission.diagnosed, false, 'Reading evidence and guessing incorrectly do not complete diagnosis');
+  state = (await request(`${targetJourney}/diagnosis/worker-paused`, 'POST')).body;
+  assert.equal(state.mission.diagnosed, true);
+  assert.equal((await request(`${targetJourney}/verify`, 'POST')).status, 409, 'The target must be saved before verification');
   await new Promise(resolve => setTimeout(resolve, 900));
   assert.equal((await request(`/api/orders/${missingId}`)).status, 404, 'The accepted order must remain missing while the worker is paused');
   // Keep the target journey intact even after the general event log rolls over.
   for (let i = 0; i < 70; i++) assert.equal((await request('/api/orders', 'POST')).status, 201);
   journey = (await request(`/api/journeys/${missingId}`)).body;
-  assert.deepEqual(journey.events.map(event => event.kind), ['request', 'enqueued', 'accepted']);
+  assert.deepEqual(journey.events.map(event => event.kind), openingEvents);
   await request('/api/worker/resume', 'POST');
-  state = await until(state => state.mission.complete);
+  state = await until(state => state.mission.delivered === 1);
+  assert.equal(state.mission.complete, false, 'Saving the target does not verify its record');
   assert.equal(state.mission.delivered, 1);
   assert.equal((await request(`/api/orders/${missingId}`)).status, 200);
   journey = (await request(`/api/journeys/${missingId}`)).body;
   assert.equal(journey.httpStatus, 202, 'Delivery must retain the original acceptance receipt');
   assert.equal(journey.location, 'database');
-  assert.deepEqual(journey.events.map(event => event.kind), ['request', 'enqueued', 'accepted', 'consumed', 'saved', 'completed']);
+  assert.deepEqual(journey.events.map(event => event.kind), [...openingEvents, 'consumed', 'saved', 'completed']);
   assert(journey.events.every(event => event.traceId === journey.traceId));
+  assert.equal((await snapshot()).mission.verified, false, 'Live journey polling cannot complete verification');
+  state = (await request(`${targetJourney}/verify`, 'POST')).body;
+  assert.equal(state.mission.verified, true);
+  assert.equal(state.mission.complete, true);
 
   state = (await request('/api/reset', 'POST')).body;
   assert.equal(state.mission.id, 'missing-order', 'Restart keeps the selected mission');
@@ -121,8 +140,11 @@ try {
   assert.equal(state.queue.length, 1);
   assert.notEqual(state.mission.targetOrderId, missingId, 'Restart creates a new missing order');
   assert.equal(state.mission.complete, false);
+  assert.equal(state.mission.diagnosed, false);
+  assert.equal(state.mission.verified, false);
   assert.equal((await request(`/api/journeys/${missingId}`)).status, 404, 'Restart clears prior order evidence');
-  console.log('PASS: mission two setup, exact-order completion, live journey evidence, retained receipt, event retention, and mission restart.');
+  assert.equal((await request(`${targetJourney}/verify`, 'POST')).status, 404);
+  console.log('PASS: missing-order evidence, rejected explanations, exact-order diagnosis and verification, retained receipt, event retention, and restart.');
 } finally {
   await request('/api/missions/rush-hour', 'POST');
 }

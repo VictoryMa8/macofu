@@ -21,6 +21,8 @@ public sealed class Lab : IDisposable
     private long sequence;
     private string missionId = "rush-hour";
     private string? missingOrderId;
+    private bool diagnosedMissingOrder;
+    private bool verifiedMissingOrder;
 
     public Lab()
     {
@@ -110,7 +112,8 @@ public sealed class Lab : IDisposable
                 mission = new { id = missionId, targetOrderId = missingOrderId,
                     protectedCount = protectedOrders.Count, delivered = missionId == "missing-order" ? (missingDelivered ? 1 : 0) : delivered,
                     target = missionId == "missing-order" ? 1 : 3,
-                    protectedIds = protectedOrders.ToArray(), complete = missionId == "missing-order" ? missingDelivered : protectedOrders.Count == 3 && delivered == 3 },
+                    protectedIds = protectedOrders.ToArray(), diagnosed = diagnosedMissingOrder, verified = verifiedMissingOrder,
+                    complete = missionId == "missing-order" ? diagnosedMissingOrder && verifiedMissingOrder : protectedOrders.Count == 3 && delivered == 3 },
                 events = events.TakeLast(100).ToArray() };
         }
     }
@@ -118,6 +121,28 @@ public sealed class Lab : IDisposable
     public StoredOrder? FindOrder(string id)
     {
         lock (gate) return store.All().FirstOrDefault(order => order.Id == id);
+    }
+
+    public int DiagnoseMissingOrder(string id, string cause)
+    {
+        lock (gate)
+        {
+            if (id != missingOrderId) return 404;
+            if (cause != "worker-paused") return 422;
+            diagnosedMissingOrder = true;
+            return 200;
+        }
+    }
+
+    public int VerifyMissingOrder(string id)
+    {
+        lock (gate)
+        {
+            if (id != missingOrderId) return 404;
+            if (!diagnosedMissingOrder || FindOrder(id) is null) return 409;
+            verifiedMissingOrder = true;
+            return 200;
+        }
     }
 
     public object? FindJourney(string id)
@@ -155,6 +180,8 @@ public sealed class Lab : IDisposable
             receipts.Clear();
             journeys.Clear();
             missingOrderId = null;
+            diagnosedMissingOrder = false;
+            verifiedMissingOrder = false;
             events.Clear();
             store.Clear();
             sequence = 0;
@@ -163,7 +190,9 @@ public sealed class Lab : IDisposable
                 databaseOnline = true;
                 paused = true;
                 route = "queue";
-                missingOrderId = AcceptOrder().Order.Id;
+                var order = AcceptOrder().Order;
+                missingOrderId = order.Id;
+                Record(order, "worker", "initial-state", "When this order arrived, the database was online and the worker was paused.");
             }
         }
     }

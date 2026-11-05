@@ -65,8 +65,7 @@ body:not(.lesson-started) .mission-nav { max-width: 900px; margin: auto; }
 .tool-panel p { font-size: 14px; line-height: 1.7; color: var(--muted); }
 .tool-panel h3 { font-size: 16px; margin: 0 0 12px; }
 .objectives { display: grid; gap: 20px; margin-top: 20px; }
-.objective { border-bottom: 1px solid var(--line); padding-bottom: 20px; }
-.objective:last-child { border-bottom: 0; padding-bottom: 0; }
+.objective:not([hidden]) ~ .objective:not([hidden]) { border-top: 1px solid var(--line); padding-top: 20px; }
 .objective strong { font-size: 15px; font-weight: 600; }
 .objective p { font-size: 13px; margin: 8px 0; }
 .goal-progress { font-size: 13px; font-weight: 600; color: var(--muted); }
@@ -158,9 +157,23 @@ body:not(.lesson-started) .mission-nav { max-width: 900px; margin: auto; }
 #close-code { font-size: 23px; padding: 0 4px; }
 #close-journey { font-size: 11px; color: var(--ink); padding: 8px 0; margin-left: 10px; }
 #journey-content { padding: 16px; }
+.journey-replies { margin: 14px 16px 0; padding: 12px; border-radius: 6px; background: var(--purple-soft); }
+.journey-replies div + div { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+.journey-replies dt { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.journey-replies dd { margin: 0; }
+.journey-replies dd span { display: block; font-size: 12px; line-height: 1.5; margin-top: 3px; }
+#diagnosis { margin: 18px 16px 0; }
+#diagnosis fieldset { min-width: 0; margin: 0 0 12px; border: 0; padding: 0; }
+#diagnosis legend { font: 600 16px var(--heading); padding: 0; }
+#diagnosis p { font-size: 13px; line-height: 1.6; margin: 8px 0 12px; }
+#diagnosis label { display: flex; align-items: center; gap: 9px; min-height: 44px; cursor: pointer; font-size: 13px; line-height: 1.4; }
+#diagnosis input { flex: 0 0 auto; accent-color: var(--ink); }
+#diagnosis input:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+#check-diagnosis { width: 100%; min-height: 44px; }
+#diagnosis-feedback:empty { margin: 0; }
 .journey-facts { display: flex; gap: 8px; font: 10px var(--mono); color: var(--muted); }
 .journey-facts code { color: var(--ink); }
-.journey-stages { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; list-style: none; padding: 0; margin: 18px 0; }
+.journey-stages { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; list-style: none; padding: 0; margin: 0; }
 .journey-stages li { border: 1px solid var(--line); border-top: 3px solid var(--line); border-radius: 6px; padding: 13px; display: flex; flex-direction: column; gap: 9px; }
 .journey-stages li.reached { border-top-color: var(--ink); background: var(--green-soft); }
 .journey-stages button { border: 0; background: none; color: var(--ink); padding: 0; text-align: left; font-size: 12px; font-weight: 600; width: fit-content; }
